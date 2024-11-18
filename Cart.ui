@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>519</height>
+    <width>835</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,9 +36,9 @@
    <widget class="QTableWidget" name="ProductsTableWidget">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>50</x>
       <y>170</y>
-      <width>761</width>
+      <width>731</width>
       <height>221</height>
      </rect>
     </property>
@@ -83,6 +83,12 @@
       <height>28</height>
      </rect>
     </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
     <property name="text">
      <string>Checkout</string>
     </property>
@@ -90,7 +96,7 @@
    <widget class="QPushButton" name="pushButton_deleteItem">
     <property name="geometry">
      <rect>
-      <x>570</x>
+      <x>590</x>
       <y>410</y>
       <width>93</width>
       <height>28</height>
@@ -103,7 +109,7 @@
    <widget class="QPushButton" name="pushButton_backToCatalogue">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>670</x>
       <y>30</y>
       <width>131</width>
       <height>28</height>
@@ -132,19 +138,47 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QLabel" name="label_username_5">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>420</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Total Payable</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_TotalAmount">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>420</y>
+      <width>181</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TotalAmt</string>
+    </property>
+   </widget>
    <zorder>label_background</zorder>
    <zorder>label_logo_7</zorder>
    <zorder>ProductsTableWidget</zorder>
    <zorder>pushButton_Checkout</zorder>
    <zorder>pushButton_deleteItem</zorder>
    <zorder>pushButton_backToCatalogue</zorder>
+   <zorder>label_username_5</zorder>
+   <zorder>label_TotalAmount</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>835</width>
      <height>26</height>
     </rect>
    </property>

@@ -60,7 +60,7 @@ class SignupScreen(QtWidgets.QMainWindow):
 class CatalogueScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(CatalogueScreen, self).__init__()
-        uic.loadUi('catalogue.ui', self)
+        uic.loadUi('catalogue2.ui', self)
         self.setWindowTitle("Safatique Catalogue")
         self.setFixedSize(self.size())
         self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
@@ -78,7 +78,40 @@ class CartScreen(QtWidgets.QMainWindow):
         uic.loadUi('Cart.ui', self)
         self.setWindowTitle("Cart")
         self.setFixedSize(self.size())
-        # self.pushButton_checkout.clicked.connect(self.show_checkout_screen)
+        self.pushButton_Checkout.clicked.connect(self.show_checkout_screen)
+        self.pushButton_backToCatalogue.clicked.connect(self.close)
+        
+    def show_checkout_screen(self):
+        self.checkout_screen = CheckoutScreen()
+        self.setFixedSize(self.size())
+        self.checkout_screen.show()
+        
+class CheckoutScreen(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(CheckoutScreen, self).__init__()
+        uic.loadUi('checkout.ui', self)
+        self.setWindowTitle("Checkout")
+        self.setFixedSize(self.size())
+        self.pushButton_placeOrder.clicked.connect(self.show_place_order_screen)
+        
+    def show_place_order_screen(self):
+        # Simulate order placement logic
+        order_successful = True  # Replace with actual logic
+
+        if order_successful:
+            self.show_popup("Order placed successfully!")
+            self.close()
+        else:
+            self.show_popup("Error placing order. Please try again.")
+
+    def show_popup(self, message):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+        msg.setText(message)
+        msg.setWindowTitle("Order Status")
+        msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msg.exec()
+
 
 
 class ImageWidget(QWidget):

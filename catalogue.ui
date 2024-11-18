@@ -163,7 +163,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Welcome to Safatique, your destination for handmade jewelry that transforms everyday moments into fairytale dreams. Embrace the Princess Core aesthetic with our uniquely crafted pieces designed to make you feel like royalty. Each item is meticulously created to add a touch of drama and elegance to your style. Discover the magic of being extraordinary with Safatique.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QScrollArea" name="scrollArea">
+   <widget class="QScrollArea" name="scrollArea_products">
     <property name="geometry">
      <rect>
       <x>400</x>
