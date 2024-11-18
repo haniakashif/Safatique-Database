@@ -1,28 +1,87 @@
 import sys
-from PyQt6 import QtWidgets, QtGui, QtCore
-from catalogue_ui import Ui_MainWindow  # Import the converted UI file
+from PyQt6 import QtWidgets, uic
+from PyQt6.QtWidgets import QApplication, QWidget, QTableWidget
+from PyQt6.QtGui import QPixmap, QPainter
 
-class CatalogueApp(QtWidgets.QMainWindow):
+class UI(QtWidgets.QMainWindow):
     def __init__(self):
-        super().__init__()
-        
-        # Set up the UI from the imported file
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-
-        # Assuming your product items are inside a Scroll Area in the UI file
-        # Check if the Scroll Area is working as expected
-        self.ui.scrollArea.setWidgetResizable(True)
-
-        # Add some basic styling (optional)
+        # Call the inherited classes __init__ method
+        super(UI, self).__init__()
+        # Load the .ui file
+        uic.loadUi('homepage.ui', self)
+        # Show the GUI
+        self.show()
         self.setWindowTitle("Safatique Catalogue")
-        self.setWindowIcon(QtGui.QIcon("path/to/icon.png"))  # Optional: Set an app icon
+        # self.scrollArea.setWidgetResizable(True)
+        # Set fixed size for the window
+        self.setFixedSize(self.size())
+        self.pushButton_shopNow.clicked.connect(self.show_login_screen)
 
-        # You can perform additional setup or add functionality here if needed
-        # For example, loading product images, names, and prices dynamically
+        # Create and set up the table widget
+        self.tableWidget = TableWidget(1, 2, self)
+        self.tableWidget.setGeometry(50, 50, 400, 300)  # Adjust the position and size as needed
+        self.tableWidget.setImage(0, 1, "charms1.jpg")  # Replace with your image path
+        self.tableWidget.setRowHeight(0, 200)  # Set row height
+        self.tableWidget.setColumnWidth(1, 200)  # Set column width
+        # self.tableWidget.show()
+        
+    def show_login_screen(self):
+        self.login_screen = LoginScreen()
+        self.setFixedSize(self.size())
+        self.login_screen.show()
 
-# Initialize and display the app
-app = QtWidgets.QApplication(sys.argv)
-window = CatalogueApp()
-window.show()
-sys.exit(app.exec())
+
+class LoginScreen(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(LoginScreen, self).__init__()
+        uic.loadUi('login screen.ui', self)
+        self.setFixedSize(self.size())
+        self.pushButton_signup.clicked.connect(self.show_signup_screen)
+        self.pushButton_login.clicked.connect(self.show_catalogue_screen)
+        
+    def show_signup_screen(self):
+        self.signup_screen = SignupScreen()
+        self.setFixedSize(self.size())
+        self.signup_screen.show()
+        
+    def show_catalogue_screen(self):
+        self.catalogue_screen = CatalogueScreen()
+        self.setFixedSize(self.size())
+        self.catalogue_screen.show()
+        
+class SignupScreen(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(SignupScreen, self).__init__()
+        uic.loadUi('signupscreen.ui', self)
+        self.setFixedSize(self.size())
+        
+class CatalogueScreen(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(CatalogueScreen, self).__init__()
+        uic.loadUi('catalogue.ui', self)
+        self.setFixedSize(self.size())
+        
+class ImageWidget(QWidget):
+    def __init__(self, imagePath, parent):
+        super(ImageWidget, self).__init__(parent)
+        self.picture = QPixmap(imagePath)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.drawPixmap(0, 0, self.picture)
+
+class TableWidget(QTableWidget):
+    def __init__(self, *args):
+        super(TableWidget, self).__init__(*args)
+        self.setShowGrid(False)  # Disable grid lines
+
+    def setImage(self, row, col, imagePath):
+        image = ImageWidget(imagePath, self)
+        self.setCellWidget(row, col, image)
+        self.resizeRowToContents(row)
+        self.resizeColumnToContents(col)
+
+if __name__ == "__main__":
+    app = QApplication([])
+    window = UI()  # Create an instance of our class
+    sys.exit(app.exec())
