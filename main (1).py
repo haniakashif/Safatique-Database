@@ -65,13 +65,45 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.setFixedSize(self.size())
         self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
         self.pushButton_close.clicked.connect(self.close)
+        self.pushButton_findProducts.clicked.connect(self.show_products_screen)
         
     def show_cart_screen(self):
         self.cart_screen = CartScreen()
         self.setFixedSize(self.size())
         self.cart_screen.show()
         
+    def show_products_screen(self):
+        self.products_screen = ProductsScreen()
+        self.setFixedSize(self.size())
+        self.products_screen.show()
         
+
+class ProductsScreen(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(ProductsScreen, self).__init__()
+        uic.loadUi('productpage.ui', self)
+        self.setWindowTitle("Safatique Products")
+        self.setFixedSize(self.size())
+        self.pushButton_addToCart.clicked.connect(self.show_cart_screen)
+        
+    def show_cart_screen(self):
+        # Simulate Add_to_cart placement logic
+        Add_to_cart_successful = True  # Replace with actual logic
+
+        if Add_to_cart_successful:
+            self.show_popup("Added to cart successfully!")
+            self.close()
+        else:
+            self.show_popup("Error adding to cart. Please try again.")
+
+    def show_popup(self, message):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+        msg.setText(message)
+        msg.setWindowTitle("Add to cart")
+        msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msg.exec()
+
 class CartScreen(QtWidgets.QMainWindow):
     def __init__(self):
         super(CartScreen, self).__init__()
@@ -111,8 +143,6 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         msg.setWindowTitle("Order Status")
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
         msg.exec()
-
-
 
 class ImageWidget(QWidget):
     def __init__(self, imagePath, parent):

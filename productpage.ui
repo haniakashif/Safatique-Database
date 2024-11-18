@@ -6,69 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>504</height>
+    <width>753</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>540</x>
-      <y>40</y>
-      <width>185</width>
-      <height>241</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string/>
-    </property>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_logo">
-       <property name="maximumSize">
-        <size>
-         <width>161</width>
-         <height>171</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap>earrings.png</pixmap>
-       </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Earrings</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="text">
-        <string>Rs. 370</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="groupBox_productDetails">
     <property name="geometry">
      <rect>
       <x>40</x>
       <y>30</y>
       <width>441</width>
-      <height>381</height>
+      <height>371</height>
      </rect>
     </property>
     <property name="title">
@@ -100,7 +52,7 @@
       <string>Category</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_9">
+    <widget class="QLabel" name="label_category">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -110,10 +62,10 @@
       </rect>
      </property>
      <property name="text">
-      <string>someCat</string>
+      <string/>
      </property>
     </widget>
-    <widget class="QLabel" name="label_10">
+    <widget class="QLabel" name="label_productName">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -123,7 +75,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>someName</string>
+      <string/>
      </property>
     </widget>
     <widget class="QLabel" name="label_11">
@@ -139,7 +91,7 @@
       <string>Price</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_12">
+    <widget class="QLabel" name="label_price">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -149,7 +101,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>somePrice</string>
+      <string/>
      </property>
     </widget>
     <widget class="QLabel" name="label_13">
@@ -165,7 +117,7 @@
       <string>Description</string>
      </property>
     </widget>
-    <widget class="QTextBrowser" name="textBrowser">
+    <widget class="QTextBrowser" name="textBrowser_description">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -176,11 +128,11 @@
      </property>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="pushButton_addToCart">
     <property name="geometry">
      <rect>
       <x>580</x>
-      <y>350</y>
+      <y>320</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -189,13 +141,64 @@
      <string>Add to Cart</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label_logo">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>90</y>
+      <width>161</width>
+      <height>171</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>161</width>
+      <height>171</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>insert image</string>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_background">
+    <property name="geometry">
+     <rect>
+      <x>-10</x>
+      <y>-10</y>
+      <width>971</width>
+      <height>781</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>16777215</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>backgroundDBMS.png</pixmap>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <zorder>label_background</zorder>
+   <zorder>groupBox_productDetails</zorder>
+   <zorder>pushButton_addToCart</zorder>
+   <zorder>label_logo</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>753</width>
      <height>26</height>
     </rect>
    </property>

@@ -493,12 +493,131 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QGroupBox" name="groupBox_7">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>200</y>
+      <width>161</width>
+      <height>251</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Categories</string>
+    </property>
+    <widget class="QRadioButton" name="radioButton_bracelets">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bracelets</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_necklaces">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>60</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Necklaces</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_earings">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Earrings</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_charms">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>120</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Charms</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_pendant">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>150</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Pendants</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_keychains">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>180</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Keychains</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButton_bundles">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>210</y>
+       <width>95</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bundles</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="pushButton_findProducts">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>460</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Find</string>
+    </property>
+   </widget>
    <zorder>label_background</zorder>
    <zorder>label_logo_7</zorder>
    <zorder>scrollArea_products</zorder>
    <zorder>pushButton_viewCart</zorder>
    <zorder>pushButton_close</zorder>
    <zorder>label_8</zorder>
+   <zorder>groupBox_7</zorder>
+   <zorder>pushButton_findProducts</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
