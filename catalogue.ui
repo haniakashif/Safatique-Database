@@ -7,38 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>1145</width>
-    <height>780</height>
+    <height>727</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label_background">
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>710</y>
-      <width>1141</width>
-      <height>720</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>1280</width>
-      <height>720</height>
-     </size>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap>backgroundDBMS.png</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_logo_7">
     <property name="geometry">
      <rect>
@@ -62,9 +37,9 @@
     <property name="geometry">
      <rect>
       <x>40</x>
-      <y>500</y>
-      <width>231</width>
-      <height>251</height>
+      <y>470</y>
+      <width>241</width>
+      <height>161</height>
      </rect>
     </property>
     <property name="title">
@@ -125,8 +100,8 @@
     <widget class="QRadioButton" name="radioButton_5">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>150</y>
+       <x>120</x>
+       <y>30</y>
        <width>95</width>
        <height>20</height>
       </rect>
@@ -138,8 +113,8 @@
     <widget class="QRadioButton" name="radioButton_6">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>180</y>
+       <x>120</x>
+       <y>60</y>
        <width>95</width>
        <height>20</height>
       </rect>
@@ -151,8 +126,8 @@
     <widget class="QRadioButton" name="radioButton_7">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>210</y>
+       <x>120</x>
+       <y>90</y>
        <width>95</width>
        <height>20</height>
       </rect>
@@ -162,13 +137,13 @@
      </property>
     </widget>
    </widget>
-   <widget class="QTextBrowser" name="textBrowser">
+   <widget class="QTextEdit" name="textEdit">
     <property name="geometry">
      <rect>
       <x>40</x>
       <y>170</y>
-      <width>321</width>
-      <height>311</height>
+      <width>341</width>
+      <height>271</height>
      </rect>
     </property>
     <property name="font">
@@ -178,7 +153,7 @@
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">color: qlineargradient(spread:pad, x1:0, y1:1, x2:1, y2:1, stop:0 rgba(255, 253, 171, 255), stop:1 rgba(255, 161, 255, 255));</string>
     </property>
     <property name="html">
      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -192,9 +167,9 @@ p, li { white-space: pre-wrap; }
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>50</y>
-      <width>691</width>
-      <height>311</height>
+      <y>60</y>
+      <width>701</width>
+      <height>561</height>
      </rect>
     </property>
     <property name="verticalScrollBarPolicy">
@@ -211,14 +186,14 @@ p, li { white-space: pre-wrap; }
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>668</width>
-       <height>309</height>
+       <width>678</width>
+       <height>559</height>
       </rect>
      </property>
      <widget class="QGroupBox" name="groupBox_5">
       <property name="geometry">
        <rect>
-        <x>260</x>
+        <x>240</x>
         <y>280</y>
         <width>185</width>
         <height>241</height>
@@ -227,46 +202,62 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string/>
       </property>
-      <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_logo_5">
-         <property name="maximumSize">
-          <size>
-           <width>161</width>
-           <height>171</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>cruella.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Cruella Bracelet</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Rs. 300</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label_logo_5">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>12</y>
+         <width>155</width>
+         <height>171</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>161</width>
+         <height>171</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>cruella.png</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>190</y>
+         <width>90</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cruella Bracelet</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>213</y>
+         <width>43</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rs. 300</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_3">
       <property name="geometry">
        <rect>
-        <x>470</x>
+        <x>450</x>
         <y>10</y>
         <width>185</width>
         <height>241</height>
@@ -275,46 +266,62 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string/>
       </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_logo_3">
-         <property name="maximumSize">
-          <size>
-           <width>161</width>
-           <height>171</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>charms1.jpg</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Kuromi Charm</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>Rs. 550</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label_logo_3">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>12</y>
+         <width>158</width>
+         <height>171</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>161</width>
+         <height>171</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>charms1.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>190</y>
+         <width>82</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Kuromi Charm</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>213</y>
+         <width>43</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rs. 550</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_6">
       <property name="geometry">
        <rect>
-        <x>470</x>
+        <x>450</x>
         <y>280</y>
         <width>185</width>
         <height>241</height>
@@ -323,46 +330,62 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string/>
       </property>
-      <layout class="QGridLayout" name="gridLayout_6">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_logo_6">
-         <property name="maximumSize">
-          <size>
-           <width>161</width>
-           <height>171</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>greenheart.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Heart Pendant</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_12">
-         <property name="text">
-          <string>Rs. 600</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label_logo_6">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>12</y>
+         <width>161</width>
+         <height>171</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>161</width>
+         <height>171</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>greenheart.png</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>190</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Heart Pendant</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>213</y>
+         <width>43</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rs. 600</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>10</y>
         <width>185</width>
         <height>241</height>
@@ -371,46 +394,62 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string/>
       </property>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_logo">
-         <property name="maximumSize">
-          <size>
-           <width>161</width>
-           <height>171</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>earrings.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Earrings</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Rs. 370</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label_logo">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>12</y>
+         <width>161</width>
+         <height>171</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>161</width>
+         <height>171</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>earrings.png</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>190</y>
+         <width>47</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Earrings</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>213</y>
+         <width>43</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rs. 370</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_2">
       <property name="geometry">
        <rect>
-        <x>260</x>
+        <x>240</x>
         <y>10</y>
         <width>185</width>
         <height>241</height>
@@ -419,46 +458,62 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string/>
       </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_logo_2">
-         <property name="maximumSize">
-          <size>
-           <width>161</width>
-           <height>171</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>bracelets.jpg</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Bracelet</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Rs. 300</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label_logo_2">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>12</y>
+         <width>149</width>
+         <height>171</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>161</width>
+         <height>171</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>bracelets.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>190</y>
+         <width>46</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Bracelet</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>213</y>
+         <width>43</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rs. 300</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBox_4">
       <property name="geometry">
        <rect>
-        <x>50</x>
+        <x>30</x>
         <y>280</y>
         <width>185</width>
         <height>241</height>
@@ -467,43 +522,72 @@ p, li { white-space: pre-wrap; }
       <property name="title">
        <string/>
       </property>
-      <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_logo_4">
-         <property name="maximumSize">
-          <size>
-           <width>161</width>
-           <height>171</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>heartnecklace1.jpg</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Heart Necklace</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>Rs. 600</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QLabel" name="label_logo_4">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>12</y>
+         <width>156</width>
+         <height>171</height>
+        </rect>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>161</width>
+         <height>171</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>heartnecklace1.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>190</y>
+         <width>85</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Heart Necklace</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>12</x>
+         <y>213</y>
+         <width>43</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Rs. 600</string>
+       </property>
+      </widget>
      </widget>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>640</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ViewCart</string>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

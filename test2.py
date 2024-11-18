@@ -15,13 +15,21 @@ class ImageWidget(QWidget):
 
 class TableWidget(QTableWidget):
 
+    def __init__(self, *args):
+        super(TableWidget, self).__init__(*args)
+        self.setShowGrid(False)  # Disable grid lines
+
     def setImage(self, row, col, imagePath):
         image = ImageWidget(imagePath, self)
         self.setCellWidget(row, col, image)
+        self.resizeRowToContents(row)
+        self.resizeColumnToContents(col)
 
 if __name__ == "__main__":
     app = QApplication([])
-    tableWidget = TableWidget(10, 2)
-    tableWidget.setImage(0, 1, "cruella.png")  # Replace with your image path
+    tableWidget = TableWidget(1, 2)
+    tableWidget.setImage(0, 1, "charms1.jpg")  # Replace with your image path
+    tableWidget.setRowHeight(0, 200)  # Set row height
+    tableWidget.setColumnWidth(1, 200)  # Set column width
     tableWidget.show()
     sys.exit(app.exec())

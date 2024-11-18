@@ -58,8 +58,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>111</width>
-      <height>111</height>
+      <width>131</width>
+      <height>131</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -87,7 +87,7 @@
     <property name="font">
      <font>
       <family>Bell MT</family>
-      <pointsize>14</pointsize>
+      <pointsize>16</pointsize>
      </font>
     </property>
     <property name="styleSheet">
@@ -97,11 +97,11 @@
      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Bell MT'; font-size:14pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Bell MT'; font-size:16pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Welcome to Safatique, your destination for handmade jewelry that transforms everyday moments into fairytale dreams. Embrace the Princess Core aesthetic with our uniquely crafted pieces designed to make you feel like royalty. Each item is meticulously created to add a touch of drama and elegance to your style. Discover the magic of being extraordinary with Safatique.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="pushButton_shopNow">
     <property name="geometry">
      <rect>
       <x>320</x>
@@ -138,7 +138,7 @@ p, li { white-space: pre-wrap; }
    <zorder>label_2</zorder>
    <zorder>label_logo</zorder>
    <zorder>textBrowser</zorder>
-   <zorder>pushButton</zorder>
+   <zorder>pushButton_shopNow</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
