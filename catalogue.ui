@@ -576,7 +576,7 @@ p, li { white-space: pre-wrap; }
      </widget>
     </widget>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="pushButton_viewCart">
     <property name="geometry">
      <rect>
       <x>1010</x>
@@ -587,6 +587,19 @@ p, li { white-space: pre-wrap; }
     </property>
     <property name="text">
      <string>ViewCart</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_close">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>640</y>
+      <width>93</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Close</string>
     </property>
    </widget>
   </widget>
