@@ -139,12 +139,40 @@ p, li { white-space: pre-wrap; }
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_AdminLogin">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>20</y>
+      <width>121</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Login as Admin</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_SalesLogin">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>60</y>
+      <width>121</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Login as Sales</string>
+    </property>
+   </widget>
    <zorder>label_background</zorder>
    <zorder>label</zorder>
    <zorder>label_2</zorder>
    <zorder>label_logo</zorder>
    <zorder>textBrowser</zorder>
    <zorder>pushButton_shopNow</zorder>
+   <zorder>pushButton_AdminLogin</zorder>
+   <zorder>pushButton_SalesLogin</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

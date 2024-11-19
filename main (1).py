@@ -12,7 +12,6 @@ class UI(QtWidgets.QMainWindow):
         # Show the GUI
         self.show()
         self.setWindowTitle("Safatique")
-        # self.scrollArea.setWidgetResizable(True)
         # Set fixed size for the window
         self.setFixedSize(self.size())
         self.pushButton_shopNow.clicked.connect(self.show_login_screen)
@@ -63,20 +62,35 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         uic.loadUi('catalogue2.ui', self)
         self.setWindowTitle("Safatique Catalogue")
         self.setFixedSize(self.size())
+        self.scrollArea_products.setWidgetResizable(True)
         self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
         self.pushButton_close.clicked.connect(self.close)
-        self.pushButton_findProducts.clicked.connect(self.show_products_screen)
+        self.pushButton_findProducts.clicked.connect(self.show_productCategory_screen)
+        # self.radioButton_charms.clicked.connect(self.show_products_screen)
         
     def show_cart_screen(self):
         self.cart_screen = CartScreen()
         self.setFixedSize(self.size())
         self.cart_screen.show()
         
+    def show_productCategory_screen(self):
+        self.product_category_screen = ProductCategoryScreen()
+        self.setFixedSize(self.size())
+        self.product_category_screen.show()
+        
+class ProductCategoryScreen(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(ProductCategoryScreen, self).__init__()
+        uic.loadUi('productCategory.ui', self)
+        self.setWindowTitle("Product Category")
+        self.setFixedSize(self.size())
+        self.pushButton_viewProduct.clicked.connect(self.show_products_screen)
+        
     def show_products_screen(self):
         self.products_screen = ProductsScreen()
         self.setFixedSize(self.size())
         self.products_screen.show()
-        
+
 
 class ProductsScreen(QtWidgets.QMainWindow):
     def __init__(self):
