@@ -62,6 +62,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         uic.loadUi('catalogue2.ui', self)
         self.setWindowTitle("Safatique Catalogue")
         self.setFixedSize(self.size())
+        self.label_logo.setPixmap(QPixmap("./images/cinnamoroll bracelet.jpg"))
         self.scrollArea_products.setWidgetResizable(True)
         self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
         self.pushButton_close.clicked.connect(self.close)
