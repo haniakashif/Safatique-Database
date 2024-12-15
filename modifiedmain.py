@@ -6,44 +6,10 @@ from PyQt6.QtCore import Qt
 import pyodbc
 
 
-def query_products(filters=None):
-    conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
-    products = []
-
-    try:
-        # Establish connection
-        conn = pyodbc.connect(conn_string)
-        cursor = conn.cursor()
-
-        # Base query
-        query = "SELECT prod_id, name, price, category, description, photo_path FROM [product]"
-
-        cursor.execute(query)
-
-        # Fetch and parse results
-        rows = cursor.fetchall()
-        for row in rows:
-            products.append({
-                "prod_id": row.prod_id,
-                "name": row.name,
-                "price": row.price,
-                "category": row.category,
-                "description": row.description,
-                "photo_path": row.photo_path
-            })
-
-        # Close cursor and connection
-        cursor.close()
-        conn.close()
-    except pyodbc.Error as e:
-        print(f"Database error: {e}")
-
-    return products
-
-class UI(QtWidgets.QMainWindow):
+class Homepage(QtWidgets.QMainWindow):
     def __init__(self):
         # Call the inherited classes __init__ method
-        super(UI, self).__init__()
+        super(Homepage, self).__init__()
         # Load the .ui file
         uic.loadUi('homepage.ui', self)
         # Show the GUI
@@ -57,7 +23,6 @@ class UI(QtWidgets.QMainWindow):
         self.login_screen = LoginScreen(self)
         self.close()
         self.login_screen.show()
-
 
 class LoginScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -83,14 +48,20 @@ class LoginScreen(QtWidgets.QMainWindow):
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
-            query = "SELECT username, [password] FROM [User] WHERE username = ? AND [password] = ?" 
+            query = "SELECT * FROM [User] WHERE username = ? AND [password] = ?" 
             cursor.execute(query, (username, password))
             result = cursor.fetchall()
             cursor.close()
             conn.close()
             
-            if len(result) > 0:
+            if len(result) > 0 and result[0].role == 'customer':
                 self.show_catalogue_screen()  # Open the next screen if login is successful
+            elif len(result) > 0 and result[0].role == 'admin':
+                pass
+                # self.show_admin_screen()
+            elif len(result) > 0 and result[0].role == 'sales':
+                pass
+                # self.show_sales_screen()
             else:
                 self.msg = QtWidgets.QMessageBox()
                 self.msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
@@ -115,6 +86,16 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.catalogue_screen = CatalogueScreen(self)
         self.hide()
         self.catalogue_screen.show()
+        
+    # def show_admin_screen(self):
+    #     self.admin_screen = UI(self)
+    #     self.hide()
+    #     self.admin_screen.show()
+    
+    # def show_sales_screen(self):
+    #     self.sales_screen = SalesScreen(self)
+    #     self.hide()
+    #     self.sales_screen.show()
 
 # class PersistentMessageBox(QtWidgets.QMessageBox):
 #     def __init__(self, *args, **kwargs):
@@ -147,55 +128,71 @@ class SignupScreen(QtWidgets.QMainWindow):
         repassword = self.lineEdit_repassword.text()
         email = self.lineEdit_email.text()
         phone = self.lineEdit_phone.text()
-        address = self.lineEdit_address.text()
 
-        if not firstName or not lastName or not email or not phone or not address or not username or not password or not repassword:
+        if not firstName or not lastName or not email or not phone or not username or not password or not repassword:
             self.show_popup("All fields are required.")
-        elif password != repassword:
-            self.show_popup("Passwords do not match.")
         elif len(username) > 10:
             self.show_popup("Username cannot be more than 10 characters long.")
+        elif len(password) > 16:
+            self.show_popup("Password cannot be more than 16 characters long.")
+        elif len(phone) != 10 or not phone.isdigit():
+            self.show_popup("Phone number must be 10 digits long and numeric.")
+        elif password != repassword:
+            self.show_popup("Passwords do not match.")
         else:
             conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn = None
+            cursor = None
             try:
-                conn = pyodbc.connect(conn_string)
+                conn = pyodbc.connect(conn_string, autocommit=False)  # Disable autocommit for transaction handling
                 cursor = conn.cursor()
 
                 # Check if username already exists
+                # cursor.execute("BEGIN TRANSACTION")
                 query = "SELECT username FROM [User] WHERE username = ?"
                 cursor.execute(query, (username,))
                 result = cursor.fetchall()
                 if len(result) > 0:
                     self.show_popup("Username already exists. Please choose another username.")
                 else:
-                    # Start a transaction
-                    try:
-                        # Insert into User table
-                        query1 = "INSERT INTO [User] (username, [password], [role]) VALUES (?, ?, ?)"
-                        cursor.execute(query1, (username, password, 'customer'))
-                        print("User inserted successfully")
+                    # Insert into User table
+                    query1 = "INSERT INTO [User] (username, [password], [role]) VALUES (?, ?, ?)"
+                    cursor.execute(query1, (username, password, 'customer'))
+                    print("User inserted successfully")
 
-                        # Insert into Customer table
-                        query2 = "INSERT INTO Customer (firstname, lastname, email, phone) VALUES (?, ?, ?, ?);"
-                        cursor.execute(query2, (firstName, lastName, email, phone))
-                        print("Customer inserted successfully")
+                    # Insert into Customer table
+                    query2 = "INSERT INTO Customer (firstname, lastname, email, phone) VALUES (?, ?, ?, ?);"
+                    cursor.execute(query2, (firstName, lastName, email, phone))
+                    print("Customer inserted successfully")
+                    
+                    # Insert into UserCustomer table
+                    query3 = "SELECT customer_id FROM Customer WHERE firstname = ? and lastname = ? and email = ? and phone = ?;"
+                    cursor.execute(query3, (firstName, lastName, email, phone))
+                    customer_id = cursor.fetchall()
+                    print("customer_id: ", customer_id)
+                    
+                    query4 = "INSERT INTO UserCustomer (username, customer_id) VALUES (?, ?);"
+                    cursor.execute(query4, (username, int(customer_id[0][0])))
+                    print("UserCustomer inserted successfully")
 
-                        # Commit the transaction
-                        conn.commit()
-                        self.show_popup("Sign up successful. Please log in to continue.")
-                        self.close()
-                    except pyodbc.Error as e:
-                        # Rollback transaction in case of error
-                        conn.rollback()
-                        self.show_popup("Error: " + str(e))
-                        print(f"Transaction error: {e}")
+                    # Commit the transaction
+                    conn.commit()
+                    self.show_popup("Sign up successful. Please log in to continue.")
+                    self.close()
             except pyodbc.Error as e:
-                self.show_popup("Database connection error: " + str(e))
-                print(f"Database connection error: {e}")
+                if conn:
+                    conn.rollback()  # Rollback transaction in case of any error
+                self.show_popup("Database error: " + str(e))
+                print(f"Database error: {e}")
+            except Exception as e:
+                if conn:
+                    conn.rollback()  # Rollback transaction in case of unexpected errors
+                self.show_popup("An unexpected error occurred: " + str(e))
+                print(f"Unexpected error: {e}")
             finally:
-                if 'cursor' in locals():
+                if cursor:
                     cursor.close()
-                if 'conn' in locals():
+                if conn:
                     conn.close()
 
     def show_popup(self, message):
@@ -239,6 +236,40 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         except Exception as e:
             print(f"Error during initialization: {e}")
 
+    def query_products(self, filters=None):
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        products = []
+
+        try:
+            # Establish connection
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+
+            # Base query
+            query = "SELECT prod_id, name, price, category, description, photo_path FROM [product]"
+
+            cursor.execute(query)
+
+            # Fetch and parse results
+            rows = cursor.fetchall()
+            for row in rows:
+                products.append({
+                    "prod_id": row.prod_id,
+                    "name": row.name,
+                    "price": row.price,
+                    "category": row.category,
+                    "description": row.description,
+                    "photo_path": row.photo_path
+                })
+
+            # Close cursor and connection
+            cursor.close()
+            conn.close()
+        except pyodbc.Error as e:
+            print(f"Database error: {e}")
+
+        return products
+
     def populate_products(self, filters=None):
         # Clear existing products
         for i in reversed(range(self.productGridLayout.count())):
@@ -247,7 +278,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
                 widget.deleteLater()
 
         # Query products (you can add filters here if needed)
-        products = query_products(filters)
+        products = self.query_products(filters)
 
         # Add products to grid
         row, col = 0, 0
@@ -473,5 +504,5 @@ class CheckoutScreen(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication([])
-    window = UI()  # Create an instance of our class
+    window = Homepage()  # Create an instance of our class
     sys.exit(app.exec())
