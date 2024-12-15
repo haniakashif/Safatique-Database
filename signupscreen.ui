@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>730</width>
-    <height>398</height>
+    <width>719</width>
+    <height>395</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -157,7 +157,7 @@
      <string>Address</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_username_2">
+   <widget class="QLineEdit" name="lineEdit_address">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -177,10 +177,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Contact</string>
+     <string>Phone</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_username_3">
+   <widget class="QLineEdit" name="lineEdit_phone">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -203,7 +203,7 @@
      <string>Last Name</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_username_4">
+   <widget class="QLineEdit" name="lineEdit_lastName">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -226,7 +226,7 @@
      <string>First Name</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_username_5">
+   <widget class="QLineEdit" name="lineEdit_firstName">
     <property name="geometry">
      <rect>
       <x>450</x>

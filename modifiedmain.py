@@ -5,36 +5,6 @@ from PyQt6.QtGui import QPixmap, QPainter
 from PyQt6.QtCore import Qt
 import pyodbc
 
-# def query_products(filters=None):
-#     # Simulated product database with more products
-#     all = [
-#         {"title": "Diamond Ring", "price": "$1200", "image": "images/evil queen.jpg"},
-#         {"title": "Gold Necklace", "price": "$900", "image": "images/blue jade.jpg"},
-#         {"title": "Silver Bracelet", "price": "$450", "image": "images/winxed.jpg"},
-#         {"title": "Pearl Earrings", "price": "$250", "image": "images/tangled.jpg"},
-#         {"title": "Gold Watch", "price": "$1500", "image": "images/whitney.jpg"},
-#         {"title": "Platinum Ring", "price": "$2200", "image": "images/evil queen.jpg"},
-#         {"title": "Diamond Necklace", "price": "$1800", "image": "images/blue jade.jpg"},
-#         {"title": "Rose Gold Bracelet", "price": "$950", "image": "images/winxed.jpg"},
-#         {"title": "Sapphire Ring", "price": "$1100", "image": "images/evil queen.jpg"},
-#         {"title": "Emerald Necklace", "price": "$1600", "image": "images/blue jade.jpg"},
-#         {"title": "Gold Earrings", "price": "$500", "image": "images/tangled.jpg"},
-#         {"title": "Silver Pendant", "price": "$300", "image": "images/whitney.jpg"},
-#         {"title": "Platinum Ring", "price": "$2200", "image": "images/evil queen.jpg"},
-#         {"title": "Diamond Necklace", "price": "$1800", "image": "images/blue jade.jpg"},
-#         {"title": "Rose Gold Bracelet", "price": "$950", "image": "images/winxed.jpg"},
-#         {"title": "Sapphire Ring", "price": "$1100", "image": "images/evil queen.jpg"},
-#         {"title": "Emerald Necklace", "price": "$1600", "image": "images/blue jade.jpg"},
-#         {"title": "Gold Earrings", "price": "$500", "image": "images/tangled.jpg"},
-#         {"title": "Silver Pendant", "price": "$300", "image": "images/whitney.jpg"},
-#     ]
-
-#     if filters:
-#         products = [product for product in all if product["title"].lower().strip().startswith(filters["keyword"].lower())]
-#     else:
-#         products = all
-
-#     return products
 
 def query_products(filters=None):
     conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
@@ -48,7 +18,6 @@ def query_products(filters=None):
         # Base query
         query = "SELECT prod_id, name, price, category, description, photo_path FROM [product]"
 
-        # Execute query without filters
         cursor.execute(query)
 
         # Fetch and parse results
@@ -86,7 +55,7 @@ class UI(QtWidgets.QMainWindow):
         
     def show_login_screen(self):
         self.login_screen = LoginScreen(self)
-        self.hide()
+        self.close()
         self.login_screen.show()
 
 
@@ -98,18 +67,69 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Login")
         self.setFixedSize(self.size())
         self.pushButton_signup.clicked.connect(self.show_signup_screen)
-        self.pushButton_login.clicked.connect(self.show_catalogue_screen)
+        self.pushButton_login.clicked.connect(self.validate_login) #change this to validate_login
+        # self.pushButton_close.clicked.connect(self.close)
         
     def show_signup_screen(self):
         self.signup_screen = SignupScreen(self)
         self.hide()
         self.signup_screen.show()
         
+    def validate_login(self):
+        # Get the username and password entered by the user
+        username = self.lineEdit_username.text()
+        password = self.lineEdit_password.text()
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        try:
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+            query = "SELECT username, [password] FROM [User] WHERE username = ? AND [password] = ?" 
+            cursor.execute(query, (username, password))
+            result = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            
+            if len(result) > 0:
+                self.show_catalogue_screen()  # Open the next screen if login is successful
+            else:
+                self.msg = QtWidgets.QMessageBox()
+                self.msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+                self.msg.setText("Invalid username or password. Please try again.")
+                self.msg.setWindowTitle("Login Failed")
+                self.msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+                self.msg.exec()
+                self.lineEdit_username.clear()
+                self.lineEdit_password.clear()
+                
+        except pyodbc.Error as e:
+            print(f"Database error: {e}")
+            return False
+    # this event box will ignore close command to stop the login screen from closing as well, so there is no option but to login
+    def closeEvent(self, event):
+        # print("Closing login screen")
+        # if self.parent:
+        #     self.parent.show()
+        event.ignore()
+        
     def show_catalogue_screen(self):
         self.catalogue_screen = CatalogueScreen(self)
         self.hide()
         self.catalogue_screen.show()
+
+# class PersistentMessageBox(QtWidgets.QMessageBox):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+
+#     def done(self, result):
+#         # Prevent the message box from closing
+#         if result == QtWidgets.QMessageBox.StandardButton.Ok:
+#             return  # Ignore the "OK" button
+#         super().done(result)  # Allow other buttons to work normally
         
+#     def close_message_box(self):
+#         if self.msg:
+#             self.msg.close()
+
 class SignupScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(SignupScreen, self).__init__(parent)
@@ -117,6 +137,74 @@ class SignupScreen(QtWidgets.QMainWindow):
         uic.loadUi('signupscreen.ui', self)
         self.setWindowTitle("Sign Up")
         self.setFixedSize(self.size())
+        self.pushButton_signup.clicked.connect(self.validate_signup)
+        
+    def validate_signup(self):
+        firstName = self.lineEdit_firstName.text()
+        lastName = self.lineEdit_lastName.text()
+        username = self.lineEdit_username.text()
+        password = self.lineEdit_password.text()
+        repassword = self.lineEdit_repassword.text()
+        email = self.lineEdit_email.text()
+        phone = self.lineEdit_phone.text()
+        address = self.lineEdit_address.text()
+
+        if not firstName or not lastName or not email or not phone or not address or not username or not password or not repassword:
+            self.show_popup("All fields are required.")
+        elif password != repassword:
+            self.show_popup("Passwords do not match.")
+        elif len(username) > 10:
+            self.show_popup("Username cannot be more than 10 characters long.")
+        else:
+            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+            try:
+                conn = pyodbc.connect(conn_string)
+                cursor = conn.cursor()
+
+                # Check if username already exists
+                query = "SELECT username FROM [User] WHERE username = ?"
+                cursor.execute(query, (username,))
+                result = cursor.fetchall()
+                if len(result) > 0:
+                    self.show_popup("Username already exists. Please choose another username.")
+                else:
+                    # Start a transaction
+                    try:
+                        # Insert into User table
+                        query1 = "INSERT INTO [User] (username, [password], [role]) VALUES (?, ?, ?)"
+                        cursor.execute(query1, (username, password, 'customer'))
+                        print("User inserted successfully")
+
+                        # Insert into Customer table
+                        query2 = "INSERT INTO Customer (firstname, lastname, email, phone) VALUES (?, ?, ?, ?);"
+                        cursor.execute(query2, (firstName, lastName, email, phone))
+                        print("Customer inserted successfully")
+
+                        # Commit the transaction
+                        conn.commit()
+                        self.show_popup("Sign up successful. Please log in to continue.")
+                        self.close()
+                    except pyodbc.Error as e:
+                        # Rollback transaction in case of error
+                        conn.rollback()
+                        self.show_popup("Error: " + str(e))
+                        print(f"Transaction error: {e}")
+            except pyodbc.Error as e:
+                self.show_popup("Database connection error: " + str(e))
+                print(f"Database connection error: {e}")
+            finally:
+                if 'cursor' in locals():
+                    cursor.close()
+                if 'conn' in locals():
+                    conn.close()
+
+    def show_popup(self, message):
+        popup = QtWidgets.QMessageBox(self)
+        popup.setIcon(QtWidgets.QMessageBox.Icon.Information)
+        popup.setText(message)
+        popup.setWindowTitle("Sign Up")
+        popup.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        popup.exec()
         
     def closeEvent(self, event):
         if self.parent:
@@ -128,7 +216,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         super().__init__(parent)
         self.parent = parent
         try:
-            uic.loadUi('new_cat.ui', self)  # Load UI file
+            uic.loadUi('testCatalogue.ui', self)  # Load UI file
 
             # Ensure the logo scales appropriately
             self.logoLabel.setScaledContents(True)
