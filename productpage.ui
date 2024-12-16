@@ -131,8 +131,8 @@
    <widget class="QPushButton" name="pushButton_addToCart">
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>310</y>
+      <x>540</x>
+      <y>320</y>
       <width>93</width>
       <height>28</height>
      </rect>
@@ -207,22 +207,11 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QSpinBox" name="spinBox_quantity">
-    <property name="geometry">
-     <rect>
-      <x>580</x>
-      <y>350</y>
-      <width>61</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
    <zorder>label_background</zorder>
    <zorder>groupBox_productDetails</zorder>
    <zorder>pushButton_addToCart</zorder>
    <zorder>label_logo</zorder>
    <zorder>label_logo_7</zorder>
-   <zorder>spinBox_quantity</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

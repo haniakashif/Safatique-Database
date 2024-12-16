@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>954</width>
-    <height>631</height>
+    <width>747</width>
+    <height>542</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="editbutton">
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>520</y>
+      <x>600</x>
+      <y>200</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -32,7 +32,7 @@
      <rect>
       <x>60</x>
       <y>90</y>
-      <width>841</width>
+      <width>501</width>
       <height>391</height>
      </rect>
     </property>
@@ -65,8 +65,8 @@
    <widget class="QPushButton" name="closebutton">
     <property name="geometry">
      <rect>
-      <x>810</x>
-      <y>520</y>
+      <x>600</x>
+      <y>300</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -75,13 +75,26 @@
      <string>Close</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="addbutton">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>250</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Add</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>954</width>
+     <width>747</width>
      <height>21</height>
     </rect>
    </property>

@@ -18,7 +18,7 @@ class UI(QtWidgets.QMainWindow):
         super(UI, self).__init__() 
         # Load the .ui file
         uic.loadUi('sales_screen.ui', self) 
-        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        self.conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
 
         # Load data on screen load
         self.load_sales_data()
@@ -84,7 +84,7 @@ class UI(QtWidgets.QMainWindow):
         CASE
             WHEN PaymentInfo.payment_id IS NULL THEN 'Bank Transfer'
             ELSE 'COD'
-        END AS payment_status,
+        END AS paymentmode,
         processing_status, firstname, lastname, email, phone, address, city
         FROM Orders
         JOIN OrderDetails ON Orders.order_id = OrderDetails.order_id
@@ -93,22 +93,23 @@ class UI(QtWidgets.QMainWindow):
         JOIN Address ON CustomerAddress.address_id = Address.address_id
         LEFT JOIN CustomerPaymentInfo ON Customer.customer_id = CustomerPaymentInfo.customer_id
         LEFT JOIN PaymentInfo ON CustomerPaymentInfo.payment_id = PaymentInfo.payment_id
+        where 1=1
         """
         params = []
     
 
 
-        payment_status = self.filterpmstatus_2.currentText()
+        paymentmode = self.filterpmstatus_2.currentText()
         # Add the condition for payment_status if it's not "Any"
-        if payment_status != "Any":
+        if paymentmode != "Any":
             query += """
-            WHERE (CASE
+            AND (CASE
                     WHEN PaymentInfo.payment_id IS NULL THEN 'Bank Transfer'
                     ELSE 'COD'
                 END) = ?
             """
             # Append the selected payment status to params
-            params.append(payment_status)
+            params.append(paymentmode)
         
         # Processing Status Filter
         if self.filterfstatus_2.currentText() != "Any":
@@ -117,8 +118,8 @@ class UI(QtWidgets.QMainWindow):
 
         # Date Range Filter
         if self.date_2.isChecked():
-            from_date = self.fromdate.date().toString("yyyy-MM-dd")
-            to_date = self.todate.date().toString("yyyy-MM-dd")
+            from_date = self.fromdate_2.date().toString("yyyy-MM-dd")
+            to_date = self.todate_2.date().toString("yyyy-MM-dd")
             query += " AND order_date BETWEEN ? AND ?"
             params.extend([from_date, to_date])
 
@@ -362,7 +363,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
         # Close button functionality
         self.closebutton.clicked.connect(self.close)
     def populate_table(self):
-        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -444,7 +445,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
             return
 
         # Connect to the database and insert the new raw material
-        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -477,7 +478,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
         column_name = self.RawMatsTable.horizontalHeaderItem(col).text()
 
         # Connect to the database
-        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
