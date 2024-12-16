@@ -577,7 +577,7 @@ class CartScreen(QtWidgets.QMainWindow):
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
         msg.setText(message)
-        msg.setWindowTitle("Cart Error")
+        msg.setWindowTitle("Cart")
         msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
         msg.exec()
 
