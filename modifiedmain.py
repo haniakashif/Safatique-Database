@@ -6,10 +6,10 @@ from PyQt6.QtCore import Qt
 import pyodbc
 import datetime
 
-global customerID
-global addressID 
-global usernameCustomer
-global paymentID
+# global customerID
+# global addressID 
+# global usernameCustomer
+# global paymentID
 
 class Homepage(QtWidgets.QMainWindow):
     def __init__(self):
@@ -71,18 +71,21 @@ class LoginScreen(QtWidgets.QMainWindow):
             
             if len(result) > 0 and result[0][2] == 'customer':
                 self.show_catalogue_screen()  # Open the next screen if login is successful
+                global usernameCustomer
                 usernameCustomer = username
                 query = "SELECT customer_id FROM [UserCustomer] WHERE username = ?"
                 cursor.execute(query, (usernameCustomer))
                 result = cursor.fetchall()
+                global customerID
                 customerID = result[0][0]
                 query = "SELECT address_id FROM [CustomerAddress] WHERE customer_id = ?"
                 cursor.execute(query, (customerID))
                 result = cursor.fetchall()
+                global addressID
                 addressID = result[0][0]
-                print("customerID: ", customerID)
-                print("addressID: ", addressID)
-                print("usernameCustomer: ", usernameCustomer)
+                # print("customerID: ", customerID)
+                # print("addressID: ", addressID)
+                # print("usernameCustomer: ", usernameCustomer)
                 self.lineEdit_username.clear()
                 self.lineEdit_password.clear()
             elif len(result) > 0 and result[0][2] == 'admin':
@@ -262,17 +265,17 @@ class CatalogueScreen(QtWidgets.QMainWindow):
 
             self.populate_products() # Populate products initially
             self.load_categories()  # Load categories from the database
-            print("customerID: ", customerID)
-            print("addressID: ", addressID)
-            print("usernameCustomer: ", usernameCustomer)
+            # print("customerID: ", customerID)
+            # print("addressID: ", addressID)
+            # print("usernameCustomer: ", usernameCustomer)
         
         except Exception as e:
             print(f"Error during initialization: {e}")
 
     def open_product_view(self, product):
-        print("customerID: ", customerID)
-        print("addressID: ", addressID)
-        print("usernameCustomer: ", usernameCustomer)
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        # print("usernameCustomer: ", usernameCustomer)
         self.products_screen = ProductsScreen(self, product)
         self.hide()
         self.products_screen.show()
@@ -459,9 +462,9 @@ class ProductsScreen(QtWidgets.QMainWindow):
             self.label_price.setText(str(self.product["price"]) + " Rs")
             self.textBrowser_description.setText(self.product["description"])
             
-        print("customerID: ", customerID)
-        print("addressID: ", addressID)
-        print("usernameCustomer: ", usernameCustomer)
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        # print("usernameCustomer: ", usernameCustomer)
 
     def show_popup(self, message):
         msg = QtWidgets.QMessageBox()
@@ -478,9 +481,9 @@ class ProductsScreen(QtWidgets.QMainWindow):
     
     def add_to_cart_and_show_cart(self):
         # Get quantity from spinBox
-        print("customerID: ", customerID)
-        print("addressID: ", addressID)
-        print("usernameCustomer: ", usernameCustomer)
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        # print("usernameCustomer: ", usernameCustomer)
         quantity = self.spinBox_quantity.value()
         if quantity < 1:
             self.show_popup("Please select a valid quantity.")
@@ -503,21 +506,26 @@ class ProductsScreen(QtWidgets.QMainWindow):
             cursor.execute("Set identity_insert [Cart] on")
             cursor.execute("SELECT * FROM Cart WHERE customer_id = ?", (customerID))
             cart_result = cursor.fetchone()
+            print("cart_result: ", cart_result)
 
-            if cart_result:
-                pass
-            else:
+            if not cart_result:
                 # Step 2: If no cart exists, create a new cart
-                cursor.execute(
-                    "INSERT INTO Cart (customer_id, date_created) VALUES (?, ?)",
-                    (customerID, current_date)
-                )
+                cursor.execute("INSERT INTO Cart (customer_id, date_created) VALUES (?, ?)", (customerID, current_date))
+            else:
+                # Step 3: Check if the product already exists in CartItems
+                cursor.execute("""SELECT quantity FROM CartItems WHERE customer_id = ? AND prod_id = ?""", (customerID, product_id)) 
+                item_result = cursor.fetchone()
+                print("item_result: ", item_result)
 
-            # Step 3: Insert product details into CartItems
-            cursor.execute("""
-                INSERT INTO CartItems (customer_id, prod_id, quantity, unit_price)
-                VALUES (?, ?, ?, ?)
-            """, (customerID, product_id, quantity, unit_price))
+                if item_result:
+                    # If the product already exists, update the quantity
+                    existing_quantity = item_result[0]
+                    print("existing_quantity: ", existing_quantity)
+                    new_quantity = existing_quantity + quantity
+                    cursor.execute("""UPDATE CartItems SET quantity = ?, unit_price = ? WHERE customer_id = ? AND prod_id = ?""", (new_quantity, unit_price, customerID, product_id))
+                else:
+                    # If the product does not exist, insert a new row into CartItems
+                    cursor.execute("""INSERT INTO CartItems (customer_id, prod_id, quantity, unit_price) VALUES (?, ?, ?, ?)""", (customerID, product_id, quantity, unit_price))
 
             # Commit the transaction
             conn.commit()
