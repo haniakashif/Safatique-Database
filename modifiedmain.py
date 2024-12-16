@@ -5,6 +5,10 @@ from PyQt6.QtGui import QPixmap, QPainter
 from PyQt6.QtCore import Qt
 import pyodbc
 
+customerID = ''
+addressID = ''
+usernameCustomer = ''
+
 
 class Homepage(QtWidgets.QMainWindow):
     def __init__(self):
@@ -32,12 +36,13 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Login")
         self.setFixedSize(self.size())
         self.pushButton_signup.clicked.connect(self.show_signup_screen)
-        self.pushButton_login.clicked.connect(self.show_catalogue_screen) #change this to validate_login
+        self.pushButton_login.clicked.connect(self.validate_login) #change this to validate_login
+        self.lineEdit_password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         # self.pushButton_close.clicked.connect(self.close)
         
     def show_signup_screen(self):
         self.signup_screen = SignupScreen(self)
-        self.hide()
+        # self.hide()
         self.signup_screen.show()
         
     def validate_login(self):
@@ -51,12 +56,15 @@ class LoginScreen(QtWidgets.QMainWindow):
             query = "SELECT * FROM [User] WHERE username = ? AND [password] = ?" 
             cursor.execute(query, (username, password))
             result = cursor.fetchall()
+            # print(result)
             cursor.close()
             conn.close()
             
-            if len(result) > 0 and result[0].role == 'customer':
+            if len(result) > 0 and result[0][2] == 'customer':
                 self.show_catalogue_screen()  # Open the next screen if login is successful
-            elif len(result) > 0 and result[0].role == 'admin':
+                self.lineEdit_username.clear()
+                self.lineEdit_password.clear()
+            elif len(result) > 0 and result[0][2] == 'admin':
                 pass
                 # self.show_admin_screen()
             else:
@@ -81,7 +89,7 @@ class LoginScreen(QtWidgets.QMainWindow):
         
     def show_catalogue_screen(self):
         self.catalogue_screen = CatalogueScreen(self)
-        self.hide()
+        # self.hide()
         self.catalogue_screen.show()
         
     # def show_admin_screen(self):
@@ -152,12 +160,12 @@ class SignupScreen(QtWidgets.QMainWindow):
                     # Insert into User table
                     query1 = "INSERT INTO [User] (username, [password], [role]) VALUES (?, ?, ?)"
                     cursor.execute(query1, (username, password, 'customer'))
-                    print("User inserted successfully")
+                    # print("User inserted successfully")
 
                     # Insert into Customer table
                     query2 = "INSERT INTO Customer (firstname, lastname, email, phone) VALUES (?, ?, ?, ?);"
                     cursor.execute(query2, (firstName, lastName, email, phone))
-                    print("Customer inserted successfully")
+                    # print("Customer inserted successfully")
                     
                     # Insert into UserCustomer table
                     query3 = "SELECT customer_id FROM Customer WHERE firstname = ? and lastname = ? and email = ? and phone = ?;"
@@ -166,35 +174,33 @@ class SignupScreen(QtWidgets.QMainWindow):
                     # print("customer_id: ", customer_id)
                     query4 = "INSERT INTO UserCustomer (username, customer_id) VALUES (?, ?);"
                     cursor.execute(query4, (username, int(customer_id[0][0])))
-                    print("UserCustomer inserted successfully")
+                    # print("UserCustomer inserted successfully")
                     
                     # insert into Address table
                     query5 = "INSERT INTO [Address] (address, city) VALUES (?, ?);"
                     cursor.execute(query5, (address, city))
-                    print("Address inserted successfully")
+                    # print("Address inserted successfully")
                     
                     # insert into CustomerAddress table
                     query6 = "SELECT address_id FROM [Address] WHERE address = ? and city = ?;"
                     cursor.execute(query6, (address, city))
                     address_id = cursor.fetchall()
-                    print("address_id: ", address_id)
+                    # print("address_id: ", address_id)
                     query7 = "INSERT INTO CustomerAddress (customer_id, address_id) VALUES (?, ?);"
                     cursor.execute(query7, (int(customer_id[0][0]), int(address_id[0][0])))
-                    print("CustomerAddress inserted successfully")
+                    # print("CustomerAddress inserted successfully")
 
                     # Commit the transaction
                     conn.commit()
                     self.show_popup("Sign up successful. Please log in to continue.")
                     self.close()
-                    print("signup screen closed")
+                    # print("signup screen closed")
             except pyodbc.Error as e:
-                print(f"Database error: {e}")
                 if conn:
                     conn.rollback()  # Rollback transaction in case of any error
                 self.show_popup("Database error: " + str(e))
                 # print(f"Database error: {e}")
             except Exception as e:
-                print(f"Error: {e}")
                 if conn:
                     conn.rollback()  # Rollback transaction in case of unexpected errors
                 self.show_popup("An unexpected error occurred: " + str(e))
@@ -239,6 +245,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
             self.searchLineEdit.textChanged.connect(self.apply_filters)
             self.categoryComboBox.currentIndexChanged.connect(self.apply_filters)
+            self.pushButton_logOut.clicked.connect(self.close)
 
             self.populate_products() # Populate products initially
             self.load_categories()  # Load categories from the database
@@ -275,8 +282,8 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             if conditions:
                 query += " WHERE " + " AND ".join(conditions)
 
-            print("Final query:", query)  # Debug: print the query
-            print("Parameters:", params)  # Debug: print the parameters
+            # print("Final query:", query)  # Debug: print the query
+            # print("Parameters:", params)  # Debug: print the parameters
 
             # Execute query with parameters
             cursor.execute(query, params)
@@ -378,7 +385,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         if keyword:
             filters["keyword"] = keyword
 
-        print(f"Applying filters: {filters}")  # Debugging
+        # print(f"Applying filters: {filters}")  # Debugging
 
         # Refresh the product grid with the applied filters
         self.populate_products(filters)
