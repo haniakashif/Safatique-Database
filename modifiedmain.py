@@ -224,10 +224,8 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.parent = parent
         try:
             uic.loadUi('testCatalogue.ui', self)  # Load UI file
-
             # Ensure the logo scales appropriately
             self.logoLabel.setScaledContents(False)
-            self.categoryComboBox.addItem("All Categories")  # Add default category option
 
             # Configure scroll area for products
             self.scrollArea.setWidgetResizable(True)
@@ -242,8 +240,8 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             self.pushButton_applyFilters.clicked.connect(self.apply_filters)
             self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
 
-            # Populate products initially
-            self.populate_products()
+            self.populate_products() # Populate products initially
+            self.load_categories()  # Load categories from the database
         except Exception as e:
             print(f"Error during initialization: {e}")
 
@@ -258,8 +256,29 @@ class CatalogueScreen(QtWidgets.QMainWindow):
 
             # Base query
             query = "SELECT prod_id, name, price, category, description, photo_path FROM [product]"
+            conditions = []  # List to hold WHERE conditions
+            params = []  # List to hold parameter values for placeholders
 
-            cursor.execute(query)
+            # Apply category filter (excluding "All Categories")
+            if filters and filters.get("category") and filters["category"] != "All Categories":
+                conditions.append("category = ?")
+                params.append(filters["category"])
+
+            # Apply keyword filter for product name or description
+            if filters and filters.get("keyword"):
+                conditions.append("(name LIKE ? OR description LIKE ?)")
+                keyword = f"%{filters['keyword']}%"
+                params.extend([keyword, keyword])
+
+            # Add WHERE clause if there are conditions
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            print("Final query:", query)  # Debug: print the query
+            print("Parameters:", params)  # Debug: print the parameters
+
+            # Execute query with parameters
+            cursor.execute(query, params)
 
             # Fetch and parse results
             rows = cursor.fetchall()
@@ -280,6 +299,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             print(f"Database error: {e}")
 
         return products
+
 
     def populate_products(self, filters=None):
         # Clear existing products
@@ -346,11 +366,42 @@ class CatalogueScreen(QtWidgets.QMainWindow):
                 row += 1
 
     def apply_filters(self):
+        # Get selected category and search keyword
         category = self.categoryComboBox.currentText()
-        keyword = self.searchLineEdit.text()
-        filters = {"category": category, "keyword": keyword}
-        print(f"Applying filters: {filters}")
+        keyword = self.searchLineEdit.text().strip()  # Remove extra spaces
+
+        # Prepare filters dictionary
+        filters = {}
+        if category and category != "All Categories":
+            filters["category"] = category
+        if keyword:
+            filters["keyword"] = keyword
+
+        print(f"Applying filters: {filters}")  # Debugging
+
+        # Refresh the product grid with filters
         self.populate_products(filters)
+
+    def load_categories(self):
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        try:
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+
+            # Query to fetch unique categories
+            query = "SELECT DISTINCT category FROM [product]"
+            cursor.execute(query)
+
+            # Add categories to the ComboBox
+            self.categoryComboBox.addItem("All Categories")  # Default option
+            for row in cursor.fetchall():
+                self.categoryComboBox.addItem(row.category)
+
+            cursor.close()
+            conn.close()
+        except pyodbc.Error as e:
+            print(f"Database error: {e}")
+
 
     def open_product_view(self, product):
         self.products_screen = ProductsScreen(self, product)
@@ -516,4 +567,4 @@ class CheckoutScreen(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QApplication([])
     window = Homepage()  # Create an instance of our class
-    sys
+    sys.exit(app.exec())
