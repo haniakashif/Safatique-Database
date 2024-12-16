@@ -32,7 +32,7 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Login")
         self.setFixedSize(self.size())
         self.pushButton_signup.clicked.connect(self.show_signup_screen)
-        self.pushButton_login.clicked.connect(self.validate_login) #change this to validate_login
+        self.pushButton_login.clicked.connect(self.show_catalogue_screen) #change this to validate_login
         # self.pushButton_close.clicked.connect(self.close)
         
     def show_signup_screen(self):
@@ -246,7 +246,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             self.setFixedSize(1200, 720)
 
             # Connect UI elements
-            self.applyFiltersButton.clicked.connect(self.apply_filters)
+            self.pushButton_applyFilters.clicked.connect(self.apply_filters)
             self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
 
             # Populate products initially
@@ -318,7 +318,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             # Title (clickable)
             title_label = QLabel(product["name"])
             title_label.setStyleSheet("font-weight: bold; text-align: center;")
-            title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
             title_label.setTextInteractionFlags(Qt.TextInteractionFlag.LinksAccessibleByMouse)
             title_label.mousePressEvent = lambda _, p=product: self.open_product_view(p)
             title_label.mousePressEvent = lambda event, p=product: self.open_product_view(p)
@@ -326,7 +326,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             # Price
             price_label = QLabel(str(product["price"]))
             price_label.setStyleSheet("color: green; text-align: center;")
-            price_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            price_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
             product_layout.addWidget(price_label)
 
             # Set layout and styling
@@ -410,7 +410,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
             self.label_logo.setPixmap(pixmap.scaled(self.label_logo.size(), Qt.AspectRatioMode.KeepAspectRatio))
             self.label_productName.setText(self.product["name"])
             self.label_category.setText(self.product.get("category", "N/A"))
-            self.label_price.setText(str(self.product["price"]))
+            self.label_price.setText(str(self.product["price"])+" Rs")
             self.textBrowser_description.setText(self.product["description"])
         
     def add_to_cart_and_show_cart(self):
