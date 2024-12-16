@@ -492,8 +492,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
         # Extract product details
         product_id = self.product["prod_id"]
         product_name = self.product["name"]
-        price = float(self.product["price"])
-        unit_price = price * quantity
+        unit_price = float(self.product["price"])
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
         # Database connection
@@ -506,7 +505,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
             cursor.execute("Set identity_insert [Cart] on")
             cursor.execute("SELECT * FROM Cart WHERE customer_id = ?", (customerID))
             cart_result = cursor.fetchone()
-            print("cart_result: ", cart_result)
+            # print("cart_result: ", cart_result)
 
             if not cart_result:
                 # Step 2: If no cart exists, create a new cart
@@ -515,7 +514,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
                 # Step 3: Check if the product already exists in CartItems
                 cursor.execute("""SELECT quantity FROM CartItems WHERE customer_id = ? AND prod_id = ?""", (customerID, product_id)) 
                 item_result = cursor.fetchone()
-                print("item_result: ", item_result)
+                # print("item_result: ", item_result)
 
                 if item_result:
                     # If the product already exists, update the quantity
@@ -603,7 +602,6 @@ class CartScreen(QtWidgets.QMainWindow):
         for item in cart_items:
             total_amount += item["unit_price"] * item["quantity"]
         self.label_TotalAmount.setText(str(total_amount))
-            
 
     def get_cart_items(self):
         """
@@ -616,7 +614,6 @@ class CartScreen(QtWidgets.QMainWindow):
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
-
             # SQL Query to fetch cart items and product details
             query = """
                 SELECT P.name, P.category, CI.quantity, CI.unit_price
@@ -648,37 +645,77 @@ class CartScreen(QtWidgets.QMainWindow):
         return cart_items
     
     def delete_item(self):
-        row_position = self.ProductsTableWidget.currentRow()
-        if row_position == -1:
-            self.show_popup("Please select an item to delete.")
+        """
+        Delete the selected product or decrease its quantity in the cart.
+        """
+        selected_row = self.ProductsTableWidget.currentRow()
+        if selected_row == -1:
+            self.show_popup("Please select a product to delete.")
             return
-        product_name = self.ProductsTableWidget.item(row_position, 0).text()
-        product_quantity = self.ProductsTableWidget.item(row_position, 1).text()
-        product_price = self.ProductsTableWidget.item(row_position, 2).text()
-        product_category = self.ProductsTableWidget.item(row_position, 3).text()
-        product_total = self.ProductsTableWidget.item(row_position, 4).text()
-        # print(product_name, product_quantity, product_price, product_category, product_total)
-        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+
+        # Fetch product details from the selected row
+        product_name = self.ProductsTableWidget.item(selected_row, 0).text()
+        quantity = int(self.ProductsTableWidget.item(selected_row, 1).text())
+
+        # Confirm if the user wants to decrease the quantity or remove the item
+        confirmation = QtWidgets.QMessageBox.question(
+            self,
+            "Delete Item",
+            "Do you want to decrease the quantity by 1?\n"
+            "Click 'No' to delete the product entirely.",
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.Yes
+        )
+
         try:
+            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
-            # Delete the item from the CartItems table
-            query = "DELETE FROM CartItems WHERE customer_id = ? AND prod_id = ?"
-            cursor.execute(query, (customerID, product_name))
+
+            if confirmation == QtWidgets.QMessageBox.StandardButton.Yes:
+                # Decrease the quantity by 1
+                if quantity > 1:
+                    query = """
+                        UPDATE CartItems
+                        SET quantity = quantity - 1
+                        WHERE customer_id = ? AND prod_id = (
+                            SELECT prod_id FROM Product WHERE name = ?
+                        )
+                    """
+                    cursor.execute(query, (customerID, product_name))
+                else:
+                    # If quantity is 1, delete the item
+                    self.remove_product(cursor, product_name)
+            else:
+                # Full delete
+                self.remove_product(cursor, product_name)
+
+            # Commit changes and refresh the cart
             conn.commit()
-            self.show_popup("Item deleted successfully.")
             self.update_cart()
+            self.show_popup("Cart updated successfully!")
+
         except pyodbc.Error as e:
             print(f"Database Error: {e}")
-            self.show_popup(f"Error deleting item: {str(e)}")
+            self.show_popup(f"Error updating cart: {str(e)}")
         finally:
             if 'cursor' in locals():
                 cursor.close()
             if 'conn' in locals():
                 conn.close()
-                
-                
-                
+
+    def remove_product(self, cursor, product_name):
+        """
+        Delete the product entirely from the CartItems table.
+        """
+        query = """
+            DELETE FROM CartItems
+            WHERE customer_id = ? AND prod_id = (
+                SELECT prod_id FROM Product WHERE name = ?
+            )
+        """
+        cursor.execute(query, (customerID, product_name))
+
 
         
 class CheckoutScreen(QtWidgets.QMainWindow):
