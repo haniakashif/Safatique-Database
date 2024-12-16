@@ -224,11 +224,9 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.parent = parent
         try:
             uic.loadUi('testCatalogue.ui', self)  # Load UI file
-            # Ensure the logo scales appropriately
-            self.logoLabel.setScaledContents(False)
+            self.logoLabel.setScaledContents(False) # Ensure the logo scales appropriately
 
-            # Configure scroll area for products
-            self.scrollArea.setWidgetResizable(True)
+            self.scrollArea.setWidgetResizable(True)  # Configure scroll area for products
             self.scrollAreaWidgetContents = QWidget()
             self.productGridLayout = QGridLayout(self.scrollAreaWidgetContents)
             self.scrollArea.setWidget(self.scrollAreaWidgetContents)
@@ -237,11 +235,14 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             self.setFixedSize(1290, 720)
 
             # Connect UI elements
-            self.pushButton_applyFilters.clicked.connect(self.apply_filters)
+            # self.pushButton_applyFilters.clicked.connect(self.apply_filters)
             self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
+            self.searchLineEdit.textChanged.connect(self.apply_filters)
+            self.categoryComboBox.currentIndexChanged.connect(self.apply_filters)
 
             self.populate_products() # Populate products initially
             self.load_categories()  # Load categories from the database
+            
         except Exception as e:
             print(f"Error during initialization: {e}")
 
@@ -366,9 +367,9 @@ class CatalogueScreen(QtWidgets.QMainWindow):
                 row += 1
 
     def apply_filters(self):
-        # Get selected category and search keyword
+        # Get selected category and current search keyword
         category = self.categoryComboBox.currentText()
-        keyword = self.searchLineEdit.text().strip()  # Remove extra spaces
+        keyword = self.searchLineEdit.text().strip()  # Get text from the search field
 
         # Prepare filters dictionary
         filters = {}
@@ -379,7 +380,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
 
         print(f"Applying filters: {filters}")  # Debugging
 
-        # Refresh the product grid with filters
+        # Refresh the product grid with the applied filters
         self.populate_products(filters)
 
     def load_categories(self):

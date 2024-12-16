@@ -173,18 +173,6 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QPushButton" name="pushButton_applyFilters">
-           <property name="styleSheet">
-            <string notr="true">
-              background: white;
-             </string>
-           </property>
-           <property name="text">
-            <string>Apply Filters</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
           <widget class="QPushButton" name="pushButton_viewCart">
            <property name="styleSheet">
             <string notr="true">
