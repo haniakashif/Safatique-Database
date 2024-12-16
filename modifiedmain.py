@@ -464,7 +464,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
 
         if Add_to_cart_successful:
             self.show_popup("Added to cart successfully!")
-            self.show_cart_screen()  # Navigate to the cart screen
+            self.close()
         else:
             self.show_popup("Error adding to cart. Please try again.")
 
@@ -495,7 +495,6 @@ class CartScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Cart")
         self.setFixedSize(self.size())
         self.pushButton_Checkout.clicked.connect(self.show_checkout_screen)
-        self.pushButton_backToCatalogue.clicked.connect(self.close)
         
     def show_checkout_screen(self):
         self.checkout_screen = CheckoutScreen(self)

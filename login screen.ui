@@ -115,7 +115,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>signup</string>
+     <string>sign up</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_background">

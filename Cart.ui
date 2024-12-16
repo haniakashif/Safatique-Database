@@ -106,19 +106,6 @@
      <string>Delete Item</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_backToCatalogue">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>30</y>
-      <width>131</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Back to Catalogue</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_background">
     <property name="geometry">
      <rect>
@@ -169,7 +156,6 @@
    <zorder>ProductsTableWidget</zorder>
    <zorder>pushButton_Checkout</zorder>
    <zorder>pushButton_deleteItem</zorder>
-   <zorder>pushButton_backToCatalogue</zorder>
    <zorder>label_username_5</zorder>
    <zorder>label_TotalAmount</zorder>
   </widget>

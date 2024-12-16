@@ -95,7 +95,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Signup</string>
+     <string>Sign up</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_repassword">
