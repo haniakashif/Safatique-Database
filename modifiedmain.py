@@ -59,9 +59,6 @@ class LoginScreen(QtWidgets.QMainWindow):
             elif len(result) > 0 and result[0].role == 'admin':
                 pass
                 # self.show_admin_screen()
-            elif len(result) > 0 and result[0].role == 'sales':
-                pass
-                # self.show_sales_screen()
             else:
                 self.msg = QtWidgets.QMessageBox()
                 self.msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
@@ -91,11 +88,6 @@ class LoginScreen(QtWidgets.QMainWindow):
     #     self.admin_screen = UI(self)
     #     self.hide()
     #     self.admin_screen.show()
-    
-    # def show_sales_screen(self):
-    #     self.sales_screen = SalesScreen(self)
-    #     self.hide()
-    #     self.sales_screen.show()
 
 # class PersistentMessageBox(QtWidgets.QMessageBox):
 #     def __init__(self, *args, **kwargs):
@@ -234,7 +226,8 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             uic.loadUi('testCatalogue.ui', self)  # Load UI file
 
             # Ensure the logo scales appropriately
-            self.logoLabel.setScaledContents(True)
+            self.logoLabel.setScaledContents(False)
+            self.categoryComboBox.addItem("All Categories")  # Add default category option
 
             # Configure scroll area for products
             self.scrollArea.setWidgetResizable(True)
@@ -243,7 +236,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
             # Set the window to be non-resizable and adjust to content
-            self.setFixedSize(1200, 720)
+            self.setFixedSize(1290, 720)
 
             # Connect UI elements
             self.pushButton_applyFilters.clicked.connect(self.apply_filters)
@@ -523,4 +516,4 @@ class CheckoutScreen(QtWidgets.QMainWindow):
 if __name__ == "__main__":
     app = QApplication([])
     window = Homepage()  # Create an instance of our class
-    sys.exit(app.exec())
+    sys

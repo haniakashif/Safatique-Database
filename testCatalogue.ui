@@ -146,26 +146,6 @@ p, li { white-space: pre-wrap; }
               selection-color: black;
              </string>
            </property>
-           <item>
-            <property name="text">
-             <string>All Categories</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Rings</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Necklaces</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>Bracelets</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item row="1" column="0">
