@@ -128,8 +128,10 @@ class SignupScreen(QtWidgets.QMainWindow):
         repassword = self.lineEdit_repassword.text()
         email = self.lineEdit_email.text()
         phone = self.lineEdit_phone.text()
+        address = self.lineEdit_address.text()
+        city = self.lineEdit_city.text()
 
-        if not firstName or not lastName or not email or not phone or not username or not password or not repassword:
+        if not firstName or not lastName or not email or not phone or not username or not password or not repassword or not address or not city:
             self.show_popup("All fields are required.")
         elif len(username) > 10:
             self.show_popup("Username cannot be more than 10 characters long.")
@@ -148,9 +150,9 @@ class SignupScreen(QtWidgets.QMainWindow):
                 cursor = conn.cursor()
 
                 # Check if username already exists
-                # cursor.execute("BEGIN TRANSACTION")
+                # cursor.execute("BEGIN TRANSACTION") # DO NOT PUT THIS SINCE THE LOGIC ALREADY HANDLES ROLLBACK
                 query = "SELECT username FROM [User] WHERE username = ?"
-                cursor.execute(query, (username,))
+                cursor.execute(query, (username))
                 result = cursor.fetchall()
                 if len(result) > 0:
                     self.show_popup("Username already exists. Please choose another username.")
@@ -169,22 +171,38 @@ class SignupScreen(QtWidgets.QMainWindow):
                     query3 = "SELECT customer_id FROM Customer WHERE firstname = ? and lastname = ? and email = ? and phone = ?;"
                     cursor.execute(query3, (firstName, lastName, email, phone))
                     customer_id = cursor.fetchall()
-                    print("customer_id: ", customer_id)
-                    
+                    # print("customer_id: ", customer_id)
                     query4 = "INSERT INTO UserCustomer (username, customer_id) VALUES (?, ?);"
                     cursor.execute(query4, (username, int(customer_id[0][0])))
                     print("UserCustomer inserted successfully")
+                    
+                    # insert into Address table
+                    query5 = "INSERT INTO [Address] (address, city) VALUES (?, ?);"
+                    cursor.execute(query5, (address, city))
+                    print("Address inserted successfully")
+                    
+                    # insert into CustomerAddress table
+                    query6 = "SELECT address_id FROM [Address] WHERE address = ? and city = ?;"
+                    cursor.execute(query6, (address, city))
+                    address_id = cursor.fetchall()
+                    print("address_id: ", address_id)
+                    query7 = "INSERT INTO CustomerAddress (customer_id, address_id) VALUES (?, ?);"
+                    cursor.execute(query7, (int(customer_id[0][0]), int(address_id[0][0])))
+                    print("CustomerAddress inserted successfully")
 
                     # Commit the transaction
                     conn.commit()
                     self.show_popup("Sign up successful. Please log in to continue.")
                     self.close()
+                    print("signup screen closed")
             except pyodbc.Error as e:
+                print(f"Database error: {e}")
                 if conn:
                     conn.rollback()  # Rollback transaction in case of any error
                 self.show_popup("Database error: " + str(e))
-                print(f"Database error: {e}")
+                # print(f"Database error: {e}")
             except Exception as e:
+                print(f"Error: {e}")
                 if conn:
                     conn.rollback()  # Rollback transaction in case of unexpected errors
                 self.show_popup("An unexpected error occurred: " + str(e))
