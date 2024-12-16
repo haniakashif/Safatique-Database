@@ -554,6 +554,14 @@ class CartScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Cart")
         self.setFixedSize(self.size())
         self.pushButton_Checkout.clicked.connect(self.show_checkout_screen)
+        self.label_TotalAmount.setText("0.0")
+        self.pushButton_deleteItem.clicked.connect(self.delete_item)
+        self.update_cart()  # Update cart on screen load
+        self.ProductsTableWidget.setColumnWidth(0, int(self.ProductsTableWidget.width() * 0.35))
+        self.ProductsTableWidget.setColumnWidth(1, int(self.ProductsTableWidget.width() * 0.15))
+        self.ProductsTableWidget.setColumnWidth(2, int(self.ProductsTableWidget.width() * 0.1))
+        self.ProductsTableWidget.setColumnWidth(3, int(self.ProductsTableWidget.width() * 0.2))
+        self.ProductsTableWidget.setColumnWidth(4, int(self.ProductsTableWidget.width() * 0.2))
         
     def show_checkout_screen(self):
         self.checkout_screen = CheckoutScreen(self)
@@ -566,30 +574,112 @@ class CartScreen(QtWidgets.QMainWindow):
         event.accept()
         self.update_cart()
 
+    def show_popup(self, message):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+        msg.setText(message)
+        msg.setWindowTitle("Cart Error")
+        msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msg.exec()
+
     def update_cart(self):
         # Clear existing rows
         self.ProductsTableWidget.setRowCount(0)
-
-        # Simulate fetching cart items (replace with actual logic)
+        # Fetch cart items from database
         cart_items = self.get_cart_items()
-
         # Populate the table with cart items
         for item in cart_items:
             row_position = self.ProductsTableWidget.rowCount()
             self.ProductsTableWidget.insertRow(row_position)
 
             self.ProductsTableWidget.setItem(row_position, 0, QtWidgets.QTableWidgetItem(item["name"]))
-            self.ProductsTableWidget.setItem(row_position, 1, QtWidgets.QTableWidgetItem(str(item["price"])))
-            self.ProductsTableWidget.setItem(row_position, 2, QtWidgets.QTableWidgetItem(item["category"]))
-            self.ProductsTableWidget.setItem(row_position, 3, QtWidgets.QTableWidgetItem(item["description"]))
+            self.ProductsTableWidget.setItem(row_position, 2, QtWidgets.QTableWidgetItem(str(item["unit_price"])))
+            self.ProductsTableWidget.setItem(row_position, 1, QtWidgets.QTableWidgetItem(str(item["quantity"])))
+            self.ProductsTableWidget.setItem(row_position, 3, QtWidgets.QTableWidgetItem(item["category"]))
+            self.ProductsTableWidget.setItem(row_position, 4, QtWidgets.QTableWidgetItem(str(item["unit_price"] * item["quantity"])))
+            
+        # Calculate total amount
+        total_amount = 0
+        for item in cart_items:
+            total_amount += item["unit_price"] * item["quantity"]
+        self.label_TotalAmount.setText(str(total_amount))
+            
 
     def get_cart_items(self):
-        # Simulate fetching cart items from a database or other source
-        # Replace this with actual logic to fetch cart items
-        return [
-            {"name": "Diamond Ring", "price": 1200, "category": "Jewelry", "description": "A beautiful diamond ring"},
-            {"name": "Gold Necklace", "price": 900, "category": "Jewelry", "description": "A stunning gold necklace"}
-        ]
+        """
+        Fetch cart items from the database for the current customer.
+        Returns a list of dictionaries containing cart item details.
+        """
+        cart_items = []
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+
+        try:
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+
+            # SQL Query to fetch cart items and product details
+            query = """
+                SELECT P.name, P.category, CI.quantity, CI.unit_price
+                FROM CartItems CI
+                INNER JOIN Product P ON CI.prod_id = P.prod_id
+                WHERE CI.customer_id = ?
+            """
+            cursor.execute(query, (customerID,))
+            rows = cursor.fetchall()
+
+            # Convert rows to list of dictionaries
+            for row in rows:
+                cart_items.append({
+                    "name": row[0],
+                    "category": row[1],
+                    "quantity": row[2],
+                    "unit_price": row[3]
+                })
+
+        except pyodbc.Error as e:
+            print(f"Database Error: {e}")
+            self.show_popup(f"Error fetching cart: {str(e)}")
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
+
+        return cart_items
+    
+    def delete_item(self):
+        row_position = self.ProductsTableWidget.currentRow()
+        if row_position == -1:
+            self.show_popup("Please select an item to delete.")
+            return
+        product_name = self.ProductsTableWidget.item(row_position, 0).text()
+        product_quantity = self.ProductsTableWidget.item(row_position, 1).text()
+        product_price = self.ProductsTableWidget.item(row_position, 2).text()
+        product_category = self.ProductsTableWidget.item(row_position, 3).text()
+        product_total = self.ProductsTableWidget.item(row_position, 4).text()
+        # print(product_name, product_quantity, product_price, product_category, product_total)
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        try:
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+            # Delete the item from the CartItems table
+            query = "DELETE FROM CartItems WHERE customer_id = ? AND prod_id = ?"
+            cursor.execute(query, (customerID, product_name))
+            conn.commit()
+            self.show_popup("Item deleted successfully.")
+            self.update_cart()
+        except pyodbc.Error as e:
+            print(f"Database Error: {e}")
+            self.show_popup(f"Error deleting item: {str(e)}")
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
+                
+                
+                
+
         
 class CheckoutScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
