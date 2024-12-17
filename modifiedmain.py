@@ -767,7 +767,7 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         self.checkBox_savedAddress.stateChanged.connect(self.UseSavedAddress)
         self.checkBox_savedCard.stateChanged.connect(self.UseSavedCard)
         self.comboBox_cities.currentIndexChanged.connect(self.updateDC)
-        print(self.comboBox_cities.currentIndex())
+        # print(self.comboBox_cities.currentIndex())
         
     def updateDC(self):
             conn = pyodbc.connect(conn_string)
@@ -890,7 +890,7 @@ class CheckoutScreen(QtWidgets.QMainWindow):
             cursor = conn.cursor()
             # SQL Query to fetch cart items and product details
             query = """
-                SELECT P.name, P.category, CI.quantity, CI.unit_price
+                SELECT P.name, P.prod_id, CI.quantity, CI.unit_price
                 FROM CartItems CI
                 INNER JOIN Product P ON CI.prod_id = P.prod_id
                 WHERE CI.customer_id = ?
@@ -902,7 +902,7 @@ class CheckoutScreen(QtWidgets.QMainWindow):
             for row in rows:
                 cart_items.append({
                     "name": row[0],
-                    "category": row[1],
+                    "prod_id": row[1],
                     "quantity": row[2],
                     "unit_price": row[3],
                     "Total Price": row[2] * row[3]
@@ -938,14 +938,20 @@ class CheckoutScreen(QtWidgets.QMainWindow):
 
 
     def show_place_order_screen(self):
+        # print("Attempting to place order")
+        # print((self.checkBox_COD.isChecked() == False))
+        # print((self.checkBox_savedCard.isChecked() == True))
+        # print((self.checkBox_savedAddress.isChecked() == True))
+        today_string = datetime.datetime.now().strftime('%Y-%m-%d')
+        today = QDate.fromString(today_string, "yyyy-MM-dd")
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Icon.Critical)  # Set icon to critical (error)
         msg.setWindowTitle("Error")            # Set the window title
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)  # Add OK button
-        today = QDate.fromString(datetime.datetime.now().strftime('%Y-%m-%d'), "yyyy-MM-dd")
         if ((str(self.lineEdit_newAddress.text()) == "")):
             msg.setText("Please enter address or used saved address")
             msg.exec()
+            return
         elif (self.checkBox_COD.isChecked() == False):
             if ((self.lineEdit_newCard.text() == "" or not str(self.lineEdit_newCard.text()).isnumeric())):
                 msg.setText("Please enter a valid card number")
@@ -953,11 +959,110 @@ class CheckoutScreen(QtWidgets.QMainWindow):
             elif((len(self.lineEdit_newCVC.text()) != 3 or not str(self.lineEdit_newCVC.text()).isnumeric())):
                 msg.setText("Please enter a valid CVC number")
                 msg.exec()
+                return
             elif((self.dateEdit_expiry.date() < today)):
                 msg.setText("Please enter a valid expiry date")
                 msg.exec()
+                return
+        # print("Error checking passed")
         
+        if ((self.checkBox_COD.isChecked() == False) and (self.checkBox_savedCard.isChecked() == True) and (self.checkBox_savedAddress.isChecked() == True)):
+            self.InsertOrder()
+        elif((self.checkBox_COD.isChecked() == False) and (self.checkBox_savedCard.isChecked() == False) and (self.checkBox_savedAddress.isChecked() == True)):
+            self.InsertCard()
+            self.InsertOrder()
+        elif((self.checkBox_COD.isChecked() == False) and (self.checkBox_savedCard.isChecked() == False) and (self.checkBox_savedAddress.isChecked() == False)):
+            self.InsertAddress()
+            self.InsertCard()
+            self.InsertOrder()
+        elif ((self.checkBox_COD.isChecked() == True) and (self.checkBox_savedAddress.isChecked() == True)):
+            self.InsertOrder()
+        elif ((self.checkBox_COD.isChecked() == True) and (self.checkBox_savedAddress.isChecked() == False)):
+            self.InsertAddress()
+            self.InsertOrder()
 
+    def InsertOrder(self):
+        today_string = datetime.datetime.now().strftime('%Y-%m-%d')
+        today = QDate.fromString(today_string, "yyyy-MM-dd")
+        # Step 1: Insert into Orders table and retrieve the last inserted order_id
+        conn = pyodbc.connect(conn_string)
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO [Orders] (customer_id, order_date, payment_status, processing_status, delivery_method)
+            OUTPUT INSERTED.order_id
+            VALUES (?, ?, 'Awaiting Payment', 'Awaiting Processing', 'shipping');
+        """
+
+        cursor.execute(query, (customerID, today_string))
+        # Step 2: Insert into OrderDetails table
+        # Assuming you have a list of cart items with prod_id, quantity, and unit_price
+        cart_items = self.get_cart_items()
+
+        query = """
+            INSERT INTO [OrderDetails] (order_id, prod_id, quantity, unit_price)
+            VALUES (?, ?, ?, ?);
+        """
+        for item in cart_items:
+            cursor.execute(query, (order_id, item["prod_id"], item["quantity"], item["unit_price"]))
+        
+        query = """
+            DELETE FROM CartItems where customer_id = ?;
+            DELETE FROM Cart where customer_id = ?;
+        """
+        cursor.execute(query, (customerID, customerID))
+        # Commit the transaction
+        conn.commit()
+        self.show_popup("Order Successfully Placed!")
+        cursor.close() 
+        conn.close()
+        self.close()
+    
+    def InsertCard(self):
+        conn = pyodbc.connect(conn_string)
+        cursor = conn.cursor()
+        cardnum = self.lineEdit_newCard.text()
+        CVC = self.lineEdit_newCVC.text()
+        exp = self.dateEdit_expiry.date().toString("yyyy-MM-dd")
+        query = """
+            DECLARE @InsertedPaymentID TABLE (payment_id INT);
+
+            INSERT INTO PaymentInfo (cardnumber, card_cvc, card_expiry)
+            OUTPUT INSERTED.payment_id INTO @InsertedPaymentID(payment_id)
+            VALUES (?, ?, ?);
+
+            INSERT INTO CustomerPaymentInfo (customer_id, payment_id)
+            SELECT ?, payment_id FROM @InsertedPaymentID;
+        """
+        cursor.execute(query, (cardnum, CVC, exp, customerID))
+        conn.commit()
+        cursor.close() 
+        conn.close()
+        self.close()
+    
+    def InsertAddress(self):
+        conn = pyodbc.connect(conn_string)
+        cursor = conn.cursor()
+        cardnum = self.lineEdit_newCard.text()
+        CVC = self.lineEdit_newCVC.text()
+        exp = self.dateEdit_expiry.date().toString("yyyy-MM-dd")
+        query = """
+            DECLARE @InsertedAddressID TABLE (address_id INT);
+
+            INSERT INTO [Address] ([address], city)
+            OUTPUT INSERTED.address_id INTO @InsertedAddressID(address_id)
+            VALUES (?, ?);
+
+            INSERT INTO CustomerAddress (customer_id, address_id)
+            SELECT ?, address_id FROM @InsertedAddressID;
+        """
+        address = self.lineEdit_newAddress.text()
+        city = self.comboBox_cities.currentText()
+        cursor.execute(query, (address, city, customerID))
+        conn.commit()
+        cursor.close() 
+        conn.close()
+        self.close()
+    
     def show_popup(self, message):
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
