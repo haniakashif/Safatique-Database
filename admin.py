@@ -21,7 +21,7 @@ class UI(QtWidgets.QMainWindow):
         super(UI, self).__init__() 
         # Load the .ui file
         uic.loadUi('sales_screen.ui', self) 
-        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        self.conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
 
         # Load data on screen load
         self.load_sales_data()
@@ -535,7 +535,7 @@ class UI(QtWidgets.QMainWindow):
         if prod_id:
             print(f"Editing product with ID: {prod_id}")  # Debugging statement
         self.editproducts_screen = EditProductsScreen(prod_id)
-        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        self.conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         self.editproducts_screen.show()
     
     def showEditRawMats(self):
@@ -548,7 +548,7 @@ class EditProductsScreen(QtWidgets.QMainWindow):
         super(EditProductsScreen, self).__init__()
         # Load the .ui file
         uic.loadUi('projectScreen2.ui', self)
-        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        self.conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         self.product_id = prod_id
         self.base_price = 0
         self.variants = []
@@ -713,7 +713,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
         # Close button functionality
         self.closebutton.clicked.connect(self.close)
     def populate_table(self):
-        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -795,7 +795,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
             return
 
         # Connect to the database and insert the new raw material
-        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -828,7 +828,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
         column_name = self.RawMatsTable.horizontalHeaderItem(col).text()
 
         # Connect to the database
-        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()

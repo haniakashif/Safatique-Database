@@ -65,7 +65,7 @@ class LoginScreen(QtWidgets.QMainWindow):
         # Get the username and password entered by the user
         username = self.lineEdit_username.text()
         password = self.lineEdit_password.text()
-        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -110,26 +110,6 @@ class LoginScreen(QtWidgets.QMainWindow):
         except pyodbc.Error as e:
             print(f"Database error: {e}")
             return False
-    # this event box will ignore close command to stop the login screen from closing as well, so there is no option but to login
-        
-    # def show_admin_screen(self):
-    #     self.admin_screen = UI(self)
-    #     self.hide()
-    #     self.admin_screen.show()
-
-# class PersistentMessageBox(QtWidgets.QMessageBox):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#     def done(self, result):
-#         # Prevent the message box from closing
-#         if result == QtWidgets.QMessageBox.StandardButton.Ok:
-#             return  # Ignore the "OK" button
-#         super().done(result)  # Allow other buttons to work normally
-        
-#     def close_message_box(self):
-#         if self.msg:
-#             self.msg.close()
 
 class SignupScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -178,7 +158,7 @@ class SignupScreen(QtWidgets.QMainWindow):
         elif password != repassword:
             self.show_popup("Passwords do not match.")
         else:
-            conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
             conn = None
             cursor = None
             try:
@@ -266,10 +246,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.pushButton_logOut.clicked.connect(self.log_out)
 
         self.populate_products() # Populate products initially
-        self.load_categories()  # Load categories from the database
-        # print("customerID: ", customerID)
-        # print("addressID: ", addressID)
-        # print("usernameCustomer: ", usernameCustomer)
+        self.load_categories()  
         
         # except Exception as e:
         #     print(f"Error during initialization: {e}")
@@ -294,7 +271,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.close()
     
     def query_products(self, filters=None):
-        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         products = []
         try:
             # Establish connection
@@ -429,7 +406,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.populate_products(filters)
 
     def load_categories(self):
-        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -502,7 +479,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
         # Database connection
-        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -600,7 +577,7 @@ class CartScreen(QtWidgets.QMainWindow):
 
     def get_cart_items(self):
         cart_items = []
-        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
 
         try:
             conn = pyodbc.connect(conn_string)
@@ -670,7 +647,7 @@ class CartScreen(QtWidgets.QMainWindow):
             return
 
         try:
-            conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
 
@@ -756,6 +733,9 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         self.pushButton_placeOrder.clicked.connect(self.show_place_order_screen)
         self.comboBox_cities.setPlaceholderText("Select your city")
         self.update_details()
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn = None
+        cursor = None
         conn = pyodbc.connect(conn_string)
         cursor = conn.cursor()
         query = "SELECT firstname, lastname, email, phone FROM [Customer] WHERE customer_id = ?"
@@ -788,18 +768,21 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         # print(self.comboBox_cities.currentIndex())
         
     def updateDC(self):
-            conn = pyodbc.connect(conn_string)
-            cursor = conn.cursor()
-            query = """
-                select cost from DeliveryCharges
-                where city = ?
-                """
-            cursor.execute(query,(str(self.comboBox_cities.currentText())))
-            result = cursor.fetchall()
-            self.lineEdit_DC.setText(str(result[0][0]))
-            self.lineEdit_Total.setText(str(self.total + result[0][0]))
-            cursor.close() 
-            conn.close()
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn = None
+        cursor = None
+        conn = pyodbc.connect(conn_string)
+        cursor = conn.cursor()
+        query = """
+            select cost from DeliveryCharges
+            where city = ?
+            """
+        cursor.execute(query,(str(self.comboBox_cities.currentText())))
+        result = cursor.fetchall()
+        self.lineEdit_DC.setText(str(result[0][0]))
+        self.lineEdit_Total.setText(str(self.total + result[0][0]))
+        cursor.close() 
+        conn.close()
         
     def COD(self):
         if self.checkBox_COD.isChecked():
@@ -813,6 +796,9 @@ class CheckoutScreen(QtWidgets.QMainWindow):
             
     def UseSavedCard(self):
         if self.checkBox_savedCard.isChecked:
+            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn = None
+            cursor = None
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
             query = """
@@ -851,6 +837,9 @@ class CheckoutScreen(QtWidgets.QMainWindow):
             self.dateEdit_expiry.clear()
     def UseSavedAddress(self):
         if self.checkBox_savedAddress.isChecked():
+            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn = None
+            cursor = None
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
             query = """
@@ -901,7 +890,7 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         Returns a list of dictionaries containing cart item details.
         """
         cart_items = []
-        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
 
         try:
             conn = pyodbc.connect(conn_string)
