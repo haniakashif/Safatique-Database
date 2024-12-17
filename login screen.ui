@@ -137,6 +137,19 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton_Quick">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>230</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quick Log in</string>
+    </property>
+   </widget>
    <zorder>label_background</zorder>
    <zorder>label_username</zorder>
    <zorder>label_password</zorder>
@@ -146,6 +159,7 @@
    <zorder>pushButton_login</zorder>
    <zorder>label_prompt</zorder>
    <zorder>pushButton_signup</zorder>
+   <zorder>pushButton_Quick</zorder>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

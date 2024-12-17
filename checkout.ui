@@ -76,16 +76,6 @@
     <property name="title">
      <string>Customer Information</string>
     </property>
-    <widget class="QLineEdit" name="lineEdit_newExpiry">
-     <property name="geometry">
-      <rect>
-       <x>170</x>
-       <y>310</y>
-       <width>371</width>
-       <height>22</height>
-      </rect>
-     </property>
-    </widget>
     <widget class="QLabel" name="label_username_9">
      <property name="geometry">
       <rect>
@@ -102,7 +92,7 @@
     <widget class="QLineEdit" name="lineEdit_newCard">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>120</x>
        <y>230</y>
        <width>371</width>
        <height>22</height>
@@ -145,13 +135,13 @@
       </rect>
      </property>
      <property name="text">
-      <string>Address</string>
+      <string>Saved Address</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="lineEdit_newAddress">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>120</x>
        <y>190</y>
        <width>371</width>
        <height>22</height>
@@ -163,7 +153,7 @@
       <rect>
        <x>40</x>
        <y>90</y>
-       <width>91</width>
+       <width>41</width>
        <height>16</height>
       </rect>
      </property>
@@ -220,7 +210,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>New Address</string>
+      <string>Address</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_CustomerAddress">
@@ -317,7 +307,7 @@
     <widget class="QLineEdit" name="lineEdit_newCVC">
      <property name="geometry">
       <rect>
-       <x>170</x>
+       <x>120</x>
        <y>270</y>
        <width>371</width>
        <height>22</height>
@@ -335,6 +325,32 @@
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBox_cities">
+     <property name="geometry">
+      <rect>
+       <x>510</x>
+       <y>190</y>
+       <width>151</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QDateEdit" name="dateEdit_expiry">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>310</y>
+       <width>110</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="displayFormat">
+      <string>yyyy/MM/dd</string>
+     </property>
+     <property name="calendarPopup">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
@@ -372,11 +388,6 @@
      </column>
      <column>
       <property name="text">
-       <string>ProductID</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
        <string>Unit Price</string>
       </property>
      </column>
@@ -402,7 +413,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>TotalAmt</string>
+     <string>TotalAmt:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_username_10">
@@ -415,7 +426,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Total Payable</string>
+     <string>DC:</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_placeOrder">
@@ -437,6 +448,26 @@
      <string>Place Order</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="lineEdit_DC">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>670</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Total">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>670</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
    <zorder>label_background</zorder>
    <zorder>label_logo_7</zorder>
    <zorder>groupBox_CustomerInfo</zorder>
@@ -444,6 +475,8 @@
    <zorder>label_TotalAmount</zorder>
    <zorder>label_username_10</zorder>
    <zorder>pushButton_placeOrder</zorder>
+   <zorder>lineEdit_DC</zorder>
+   <zorder>lineEdit_Total</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -451,7 +484,7 @@
      <x>0</x>
      <y>0</y>
      <width>909</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
