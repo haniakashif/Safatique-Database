@@ -6,10 +6,6 @@ from PyQt6.QtCore import Qt
 import pyodbc
 import datetime
 
-# global customerID
-# global addressID 
-# global usernameCustomer
-# global paymentID
 
 class Homepage(QtWidgets.QMainWindow):
     def __init__(self):
@@ -25,6 +21,7 @@ class Homepage(QtWidgets.QMainWindow):
         self.pushButton_shopNow.clicked.connect(self.show_login_screen)
         
     def show_login_screen(self):
+        print("login screen called and homepage closed")
         self.login_screen = LoginScreen(self)
         self.close()
         self.login_screen.show()
@@ -47,6 +44,7 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.signup_screen.show()
         
     def closeEvent(self, event):
+        print("Closing login screen ignored")
         # print("Closing login screen")
         # if self.parent:
         #     self.parent.show()
@@ -135,6 +133,8 @@ class SignupScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Sign Up")
         self.setFixedSize(self.size())
         self.pushButton_signup.clicked.connect(self.validate_signup)
+        self.lineEdit_password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        self.lineEdit_repassword.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         
     def show_popup(self, message):
         popup = QtWidgets.QMessageBox(self)
@@ -145,6 +145,7 @@ class SignupScreen(QtWidgets.QMainWindow):
         popup.exec()
         
     def closeEvent(self, event):
+        print("Closing signup screen")
         if self.parent:
             self.parent.show()
         event.accept()
@@ -178,7 +179,6 @@ class SignupScreen(QtWidgets.QMainWindow):
                 conn = pyodbc.connect(conn_string, autocommit=False)  # Disable autocommit for transaction handling
                 cursor = conn.cursor()
 
-                # Check if username already exists
                 # cursor.execute("BEGIN TRANSACTION") # DO NOT PUT THIS SINCE THE LOGIC ALREADY HANDLES ROLLBACK
                 query = "SELECT username FROM [User] WHERE username = ?"
                 cursor.execute(query, (username))
@@ -222,6 +222,7 @@ class SignupScreen(QtWidgets.QMainWindow):
                     # Commit the transaction
                     conn.commit()
                     self.show_popup("Sign up successful. Please log in to continue.")
+                    print("closing signup screen")
                     self.close()
                     # print("signup screen closed")
             except pyodbc.Error as e:
@@ -244,33 +245,28 @@ class CatalogueScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
-        try:
-            uic.loadUi('testCatalogue.ui', self)  # Load UI file
-            self.logoLabel.setScaledContents(False) # Ensure the logo scales appropriately
+        # try:
+        uic.loadUi('testCatalogue.ui', self)  # Load UI file
+        self.setWindowTitle("Safatique Catalogue")  # Set window title
+        self.setFixedSize(1290, 720)
+        self.logoLabel.setScaledContents(False) # Ensure the logo scales appropriately
+        self.scrollArea.setWidgetResizable(True)  # Configure scroll area for products
+        self.scrollAreaWidgetContents = QWidget()
+        self.productGridLayout = QGridLayout(self.scrollAreaWidgetContents)
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
+        self.searchLineEdit.textChanged.connect(self.apply_filters)
+        self.categoryComboBox.currentIndexChanged.connect(self.apply_filters)
+        self.pushButton_logOut.clicked.connect(self.log_out)
 
-            self.scrollArea.setWidgetResizable(True)  # Configure scroll area for products
-            self.scrollAreaWidgetContents = QWidget()
-            self.productGridLayout = QGridLayout(self.scrollAreaWidgetContents)
-            self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-            # Set the window to be non-resizable and adjust to content
-            self.setFixedSize(1290, 720)
-
-            # Connect UI elements
-            # self.pushButton_applyFilters.clicked.connect(self.apply_filters)
-            self.pushButton_viewCart.clicked.connect(self.show_cart_screen)
-            self.searchLineEdit.textChanged.connect(self.apply_filters)
-            self.categoryComboBox.currentIndexChanged.connect(self.apply_filters)
-            self.pushButton_logOut.clicked.connect(self.close)
-
-            self.populate_products() # Populate products initially
-            self.load_categories()  # Load categories from the database
-            # print("customerID: ", customerID)
-            # print("addressID: ", addressID)
-            # print("usernameCustomer: ", usernameCustomer)
+        self.populate_products() # Populate products initially
+        self.load_categories()  # Load categories from the database
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        # print("usernameCustomer: ", usernameCustomer)
         
-        except Exception as e:
-            print(f"Error during initialization: {e}")
+        # except Exception as e:
+        #     print(f"Error during initialization: {e}")
 
     def open_product_view(self, product):
         # print("customerID: ", customerID)
@@ -284,11 +280,16 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.cart_screen = CartScreen(self)
         self.hide()
         self.cart_screen.show()
+        
+    def log_out(self):
+        print("log out called and catalogue closed")
+        print("usernameCustomer: ", usernameCustomer)
+        # self.parent.show()
+        self.close()
     
     def query_products(self, filters=None):
         conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         products = []
-
         try:
             # Establish connection
             conn = pyodbc.connect(conn_string)
@@ -340,7 +341,6 @@ class CatalogueScreen(QtWidgets.QMainWindow):
 
         return products
 
-
     def populate_products(self, filters=None):
         # Clear existing products
         for i in reversed(range(self.productGridLayout.count())):
@@ -377,7 +377,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
             title_label.mousePressEvent = lambda event, p=product: self.open_product_view(p)
             product_layout.addWidget(title_label)
             # Price
-            price_label = QLabel(str(product["price"]))
+            price_label = QLabel(str(product["price"]) + " Rs")
             price_label.setStyleSheet("color: green; text-align: center;")
             price_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
             product_layout.addWidget(price_label)
@@ -529,6 +529,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
             # Commit the transaction
             conn.commit()
             self.show_popup("Product added to cart successfully!")
+            print("closing product screen")
             self.close()
 
         except pyodbc.Error as e:
@@ -536,14 +537,12 @@ class ProductsScreen(QtWidgets.QMainWindow):
             self.show_popup(f"Error: {str(e)}")
             print(f"Database Error: {e}")
         finally:
-            # Close connection
             if 'cursor' in locals():
                 cursor.close()
             if 'conn' in locals():
                 conn.close()
                 
         self.show_catalogue_screen()
-
 
 class CartScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -553,25 +552,19 @@ class CartScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Cart")
         self.setFixedSize(self.size())
         self.pushButton_Checkout.clicked.connect(self.show_checkout_screen)
-        self.label_TotalAmount.setText("0.0")
+        self.label_TotalAmount.setText("0.0 Rs.")
         self.pushButton_deleteItem.clicked.connect(self.delete_item)
         self.update_cart()  # Update cart on screen load
         self.ProductsTableWidget.setColumnWidth(0, int(self.ProductsTableWidget.width() * 0.35))
         self.ProductsTableWidget.setColumnWidth(1, int(self.ProductsTableWidget.width() * 0.15))
-        self.ProductsTableWidget.setColumnWidth(2, int(self.ProductsTableWidget.width() * 0.1))
-        self.ProductsTableWidget.setColumnWidth(3, int(self.ProductsTableWidget.width() * 0.2))
+        self.ProductsTableWidget.setColumnWidth(2, int(self.ProductsTableWidget.width() * 0.15))
+        self.ProductsTableWidget.setColumnWidth(3, int(self.ProductsTableWidget.width() * 0.15))
         self.ProductsTableWidget.setColumnWidth(4, int(self.ProductsTableWidget.width() * 0.2))
         
     def show_checkout_screen(self):
         self.checkout_screen = CheckoutScreen(self)
         self.hide()
         self.checkout_screen.show()
-        
-    def closeEvent(self, event):
-        if self.parent:
-            self.parent.show()
-        event.accept()
-        self.update_cart()
 
     def show_popup(self, message):
         msg = QtWidgets.QMessageBox()
@@ -582,11 +575,8 @@ class CartScreen(QtWidgets.QMainWindow):
         msg.exec()
 
     def update_cart(self):
-        # Clear existing rows
         self.ProductsTableWidget.setRowCount(0)
-        # Fetch cart items from database
         cart_items = self.get_cart_items()
-        # Populate the table with cart items
         for item in cart_items:
             row_position = self.ProductsTableWidget.rowCount()
             self.ProductsTableWidget.insertRow(row_position)
@@ -596,18 +586,13 @@ class CartScreen(QtWidgets.QMainWindow):
             self.ProductsTableWidget.setItem(row_position, 1, QtWidgets.QTableWidgetItem(str(item["quantity"])))
             self.ProductsTableWidget.setItem(row_position, 3, QtWidgets.QTableWidgetItem(item["category"]))
             self.ProductsTableWidget.setItem(row_position, 4, QtWidgets.QTableWidgetItem(str(item["unit_price"] * item["quantity"])))
-            
-        # Calculate total amount
+
         total_amount = 0
         for item in cart_items:
             total_amount += item["unit_price"] * item["quantity"]
-        self.label_TotalAmount.setText(str(total_amount))
+        self.label_TotalAmount.setText(str(total_amount) + " Rs.")
 
     def get_cart_items(self):
-        """
-        Fetch cart items from the database for the current customer.
-        Returns a list of dictionaries containing cart item details.
-        """
         cart_items = []
         conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
 
@@ -645,9 +630,10 @@ class CartScreen(QtWidgets.QMainWindow):
         return cart_items
     
     def delete_item(self):
-        """
-        Delete the selected product or decrease its quantity in the cart.
-        """
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        print("usernameCustomer: ", usernameCustomer)
+        print("delete_item called")
         selected_row = self.ProductsTableWidget.currentRow()
         if selected_row == -1:
             self.show_popup("Please select a product to delete.")
@@ -662,10 +648,20 @@ class CartScreen(QtWidgets.QMainWindow):
             self,
             "Delete Item",
             "Do you want to decrease the quantity by 1?\n"
-            "Click 'No' to delete the product entirely.",
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
-            QtWidgets.QMessageBox.StandardButton.Yes
+            "Click 'No' to delete the product entirely.\n",
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No | QtWidgets.QMessageBox.StandardButton.Cancel
         )
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        print("usernameCustomer: ", usernameCustomer)
+        print("confirmation box opened")
+        
+        if confirmation == QtWidgets.QMessageBox.StandardButton.Cancel:
+            # print("customerID: ", customerID)
+            # print("addressID: ", addressID)
+            print("usernameCustomer: ", usernameCustomer)
+            print("confirmation box closed with cancel")
+            return
 
         try:
             conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
@@ -673,6 +669,10 @@ class CartScreen(QtWidgets.QMainWindow):
             cursor = conn.cursor()
 
             if confirmation == QtWidgets.QMessageBox.StandardButton.Yes:
+                # print("customerID: ", customerID)
+                # print("addressID: ", addressID)
+                print("usernameCustomer: ", usernameCustomer)
+                print("yes confirm")
                 # Decrease the quantity by 1
                 if quantity > 1:
                     query = """
@@ -685,9 +685,17 @@ class CartScreen(QtWidgets.QMainWindow):
                     cursor.execute(query, (customerID, product_name))
                 else:
                     # If quantity is 1, delete the item
+                    # print("customerID: ", customerID)
+                    # print("addressID: ", addressID)
+                    print("usernameCustomer: ", usernameCustomer)
+                    print("quantity is 1, so delete product")
                     self.remove_product(cursor, product_name)
             else:
                 # Full delete
+                # print("customerID: ", customerID)
+                # print("addressID: ", addressID)
+                print("usernameCustomer: ", usernameCustomer)
+                print("full delete")
                 self.remove_product(cursor, product_name)
 
             # Commit changes and refresh the cart
@@ -696,18 +704,23 @@ class CartScreen(QtWidgets.QMainWindow):
             self.show_popup("Cart updated successfully!")
 
         except pyodbc.Error as e:
+            conn.rollback()  # Rollback the transaction on error
             print(f"Database Error: {e}")
             self.show_popup(f"Error updating cart: {str(e)}")
         finally:
+            # global cartCloseFlag 
+            # cartCloseFlag = 0
             if 'cursor' in locals():
                 cursor.close()
             if 'conn' in locals():
                 conn.close()
+        
 
     def remove_product(self, cursor, product_name):
-        """
-        Delete the product entirely from the CartItems table.
-        """
+        # print("customerID: ", customerID)
+        # print("addressID: ", addressID)
+        print("usernameCustomer: ", usernameCustomer)
+        print("remove_product called")
         query = """
             DELETE FROM CartItems
             WHERE customer_id = ? AND prod_id = (
@@ -715,8 +728,16 @@ class CartScreen(QtWidgets.QMainWindow):
             )
         """
         cursor.execute(query, (customerID, product_name))
-
-
+        # cartCloseFlag = 0
+        
+    def closeEvent(self, event):
+        print("closeEvent called and closing cart screen")
+        # if cartCloseFlag == 0:
+        #     event.ignore()
+        if self.parent:
+            self.parent.show()
+        event.accept()
+        self.update_cart()
         
 class CheckoutScreen(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -733,6 +754,7 @@ class CheckoutScreen(QtWidgets.QMainWindow):
 
         if order_successful:
             self.show_popup("Order placed successfully!")
+            print("closing checkout screen")
             self.close()
         else:
             self.show_popup("Error placing order. Please try again.")
