@@ -662,40 +662,73 @@ class EditProductsScreen(QtWidgets.QMainWindow):
             print(f"Selected photo: {photo_path}")
             self.photopath = photo_path
             self.currentname.setText("Photo updated successfully!")
-
+    
     def save_changes(self):
         """
-        Save changes to the database.
+        Save changes to the database: update main product details and insert new variants.
         """
         try:
             conn = pyodbc.connect(self.conn_string)
             cursor = conn.cursor()
 
-            # Update main product details
+            # Step 1: Update Main Product Details
             cursor.execute("""
                 UPDATE Product SET name=?, price=?, category=?, description=?, photo_path=?
-                WHERE prod_id LIKE ?
+                WHERE prod_id = ?
             """, [
-                self.newname.text(), self.baseprice.text(),
-                self.prodtypecomboBox.currentText(), self.description.toPlainText(), 
-                self.photopath, self.prod_id.text() + '%'
+                self.newname.text().strip(),
+                float(self.baseprice.text().strip()),
+                self.prodtypecomboBox.currentText(),
+                self.description.toPlainText().strip(),
+                self.photopath if hasattr(self, 'photopath') else None,
+                self.prod_id.text().strip()
             ])
 
-            # Delete existing variants and add new ones
-            cursor.execute("DELETE FROM Products WHERE prod_id LIKE ?", [self.prod_id.text() + '%'])
-            for variant in self.variants:
-                cursor.execute("""
-                    INSERT INTO Product (name, prod_id, price, category, description, photo_path)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """, variant)
+            # Step 2: Insert only new variants
+            base_prod_id = self.prod_id.text().strip()  # Base product ID (e.g., "P1")
+            base_price = float(self.baseprice.text().strip())  # Base price for cost calculation
 
+            # Fetch existing variants to avoid duplicates
+            cursor.execute("SELECT prod_id FROM Product WHERE prod_id LIKE ?", [base_prod_id + "_%"])
+            existing_variant_ids = [row[0] for row in cursor.fetchall()]
+
+            # Insert new variants
+            insert_variant_query = """
+            INSERT INTO Product (name, prod_id, price, category, description, photo_path)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """
+            for variant in self.variants:
+                # Extract variant details from tuple
+                variant_name = variant[1].split('_')[1].strip()  # Extract color from prod_id
+                variant_price = float(variant[2])  # Price of this variant
+                cost_modifier = variant_price - base_price  # Calculate cost difference
+
+                # Dynamically generate prod_id for the new variant
+                variant_prod_id = f"{base_prod_id}_{variant_name}"  # e.g., P1_red or P1_blue
+
+                # Check if the variant already exists
+                if variant_prod_id not in existing_variant_ids:
+                    cursor.execute(insert_variant_query, [
+                        variant[0],  # Name
+                        variant_prod_id,
+                        variant_price,
+                        variant[3],  # Category
+                        variant[4],  # Description
+                        variant[5]   # Photo Path
+                    ])
+
+            # Commit changes
             conn.commit()
             conn.close()
-            QtWidgets.QMessageBox.information(self, "Success", "Product saved successfully!")
+
+            QtWidgets.QMessageBox.information(self, "Success", "Product and new variants saved successfully!")
             self.close()
 
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Error", f"Failed to save changes: {str(e)}")
+
+
+
 
 class EditRawMatsScreen(QtWidgets.QMainWindow):
     def __init__(self):
@@ -860,7 +893,69 @@ class ReportScreen(QtWidgets.QMainWindow):
         super(ReportScreen, self).__init__()
         # Load the report .ui file
         uic.loadUi('Database_project_report_screen.ui', self)
+        # Connect the date selection to the update method
+        self.reportfrom.dateChanged.connect(self.fetch_report_data)
+        self.reportto.dateChanged.connect(self.fetch_report_data)
+        
+        # Load initial data
+        self.fetch_report_data()
+        
+        # PDF button
         self.generatepdf.clicked.connect(self.generate_pdf)
+        
+        # Database connection string
+        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+
+    def fetch_report_data(self):
+        """
+        Fetch and display data for Visitors, Added to Cart, Orders Received, and Revenue.
+        """
+        try:
+            from_date = self.reportfrom.date().toString("yyyy-MM-dd")
+            to_date = self.reportto.date().toString("yyyy-MM-dd")
+            self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+            # Connect to database
+            conn = pyodbc.connect(self.conn_string)
+            cursor = conn.cursor()
+
+            # Visitors
+            cursor.execute("SELECT SUM(count) FROM Visitors WHERE date BETWEEN ? AND ?", (from_date, to_date))
+            visitors = cursor.fetchone()[0] or 0
+            
+            # Added to Cart
+            cursor.execute("""
+                SELECT COUNT(*), SUM(CartItems.unit_price * CartItems.quantity) 
+                FROM Cart 
+                INNER JOIN CartItems ON Cart.customer_id = CartItems.customer_id
+                WHERE Cart.date_created BETWEEN ? AND ?
+            """, (from_date, to_date))
+            cart_data = cursor.fetchone()
+            total_cart = cart_data[0] or 0
+            total_cart_worth = cart_data[1] or 0
+            
+            # Orders Received
+            cursor.execute("SELECT COUNT(*) FROM Orders WHERE order_date BETWEEN ? AND ?", (from_date, to_date))
+            total_orders = cursor.fetchone()[0] or 0
+            
+            # Revenue
+            cursor.execute("""
+                SELECT SUM(OrderDetails.unit_price * OrderDetails.quantity) 
+                FROM Orders 
+                INNER JOIN OrderDetails ON Orders.order_id = OrderDetails.order_id
+                WHERE Orders.order_date BETWEEN ? AND ?
+            """, (from_date, to_date))
+            total_revenue = cursor.fetchone()[0] or 0
+            
+            conn.close()
+
+            # Update the QTextBrowser widgets
+            self.visitors.setPlainText(str(visitors))
+            self.addedtocart.setPlainText(f"{total_cart} ({total_cart_worth} Rs)")
+            self.ordersreceived.setPlainText(str(total_orders))
+            self.revenue.setPlainText(f"{total_revenue} Rs")
+        
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load report data: {str(e)}")
 
     def extract_data(self):
         """
