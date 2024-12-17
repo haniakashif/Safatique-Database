@@ -268,7 +268,7 @@
      <string>City</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="lineEdit_city">
+   <widget class="QComboBox" name="comboBox_cities">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -277,6 +277,56 @@
       <height>22</height>
      </rect>
     </property>
+    <item>
+     <property name="text">
+      <string>Karachi</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Lahore</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Rawalpindi</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Islamabad</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Hyderabad</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Faisalabad</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Sahiwal</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Quetta</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Multan</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Bahawalpur</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

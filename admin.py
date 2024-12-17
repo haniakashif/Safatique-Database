@@ -904,7 +904,7 @@ class ReportScreen(QtWidgets.QMainWindow):
         self.generatepdf.clicked.connect(self.generate_pdf)
         
         # Database connection string
-        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        self.conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
 
     def fetch_report_data(self):
         """
@@ -913,7 +913,7 @@ class ReportScreen(QtWidgets.QMainWindow):
         try:
             from_date = self.reportfrom.date().toString("yyyy-MM-dd")
             to_date = self.reportto.date().toString("yyyy-MM-dd")
-            self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+            self.conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
             # Connect to database
             conn = pyodbc.connect(self.conn_string)
             cursor = conn.cursor()

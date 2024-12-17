@@ -140,7 +140,27 @@
      </property>
      <item>
       <property name="text">
-       <string>Product Type</string>
+       <string>Bracelets</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Keychains</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Necklaces</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Earrings</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Phone Charms</string>
       </property>
      </item>
     </widget>

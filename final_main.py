@@ -123,6 +123,7 @@ class SignupScreen(QtWidgets.QMainWindow):
         self.pushButton_signup.clicked.connect(self.validate_signup)
         self.lineEdit_password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         self.lineEdit_repassword.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        self.comboBox_cities.setPlaceholderText("Select your city")
         
     def validate_signup(self):
         firstName = self.lineEdit_firstName.text()
@@ -133,7 +134,7 @@ class SignupScreen(QtWidgets.QMainWindow):
         email = self.lineEdit_email.text()
         phone = self.lineEdit_phone.text()
         address = self.lineEdit_address.text()
-        city = self.lineEdit_city.text()
+        city = self.comboBox_cities.currentText()
 
         if not firstName or not lastName or not email or not phone or not username or not password or not repassword or not address or not city:
             self.show_popup("All fields are required.")
@@ -445,7 +446,7 @@ class Product_Screen(QtWidgets.QMainWindow):
         product_id = self.product["prod_id"]
         product_name = self.product["name"]
         unit_price = float(self.product["price"])
-        current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+        current_date = datetime.now().strftime('%Y-%m-%d')
 
         # Database connection
         conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
@@ -720,6 +721,8 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         self.pushButton_placeOrder.clicked.connect(self.show_place_order_screen)
         self.comboBox_cities.setPlaceholderText("Select your city")
         self.update_details()
+        self.lineEdit_DC.setReadOnly(True)
+        self.lineEdit_Total.setReadOnly(True)
         conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
         conn = None
         cursor = None

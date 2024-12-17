@@ -36,13 +36,13 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.pushButton_signup.clicked.connect(self.show_signup_screen)
         self.pushButton_login.clicked.connect(self.validate_login) #change this to validate_login
         self.lineEdit_password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
-        self.pushButton_Quick.clicked.connect(self.quickLogin)
+        # self.pushButton_Quick.clicked.connect(self.quickLogin)
         # self.pushButton_close.clicked.connect(self.close)
         
-    def quickLogin(self):
-        self.lineEdit_username.setText("Ahad001234")
-        self.lineEdit_password.setText("Pass1234")
-        self.validate_login()
+    # def quickLogin(self):
+    #     self.lineEdit_username.setText("Ahad001234")
+    #     self.lineEdit_password.setText("Pass1234")
+    #     self.validate_login()
         
     def show_signup_screen(self):
         self.signup_screen = SignupScreen(self)
