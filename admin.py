@@ -8,8 +8,11 @@ from PyQt6.QtCore import QDate
 from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidget,QTableWidgetItem, QVBoxLayout, QWidget, QHeaderView, QInputDialog
 import pyodbc
 from datetime import datetime
+from collections import defaultdict
+from PyQt6 import QtGui, QtCore
 from PyQt6 import QtWidgets
 from PyQt6.QtWidgets import QListWidgetItem, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QPushButton, QCheckBox
+import os
 
 
 class UI(QtWidgets.QMainWindow):
@@ -18,11 +21,12 @@ class UI(QtWidgets.QMainWindow):
         super(UI, self).__init__() 
         # Load the .ui file
         uic.loadUi('sales_screen.ui', self) 
-        self.conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
 
         # Load data on screen load
         self.load_sales_data()
         # Connect filters to apply_filters  
+        self.filterpstatus_2.currentTextChanged.connect(self.apply_filters)
         self.filterpmstatus_2.currentTextChanged.connect(self.apply_filters)
         self.filterfstatus_2.currentTextChanged.connect(self.apply_filters)
         self.date_2.stateChanged.connect(self.apply_filters)
@@ -31,9 +35,22 @@ class UI(QtWidgets.QMainWindow):
         self.filterproduct_2.textChanged.connect(self.apply_filters)
         self.search.textChanged.connect(self.apply_filters)
 
+        self.allorders_2.stateChanged.connect(self.apply_filters)
+        self.paid_2.stateChanged.connect(self.apply_filters)
+        self.notpaid_2.stateChanged.connect(self.apply_filters)
+        self.fulfillment_2.stateChanged.connect(self.apply_filters)
+
         self.reportbutton.clicked.connect(self.show_report_screen)
         self.productsbutton.clicked.connect(self.showproducts)
         self.rawmaterial.clicked.connect(self.showEditRawMats)
+
+    def show_sales_screen(self):
+        """
+        Show the Sales Screen and hide the Products Screen.
+        """
+        self.products_screen.hide()  # Hide Products Screen
+        self.sales_screen.show()  # Show Sales Screen
+
 
     def load_sales_data(self):
         """
@@ -80,11 +97,7 @@ class UI(QtWidgets.QMainWindow):
         Apply filters to update the displayed orders.
         """
         query = """
-        SELECT distinct Orders.order_id, order_date, 
-        CASE
-            WHEN PaymentInfo.payment_id IS NULL THEN 'Bank Transfer'
-            ELSE 'COD'
-        END AS paymentmode,
+        SELECT distinct Orders.order_id, order_date, payment_status,
         processing_status, firstname, lastname, email, phone, address, city
         FROM Orders
         JOIN OrderDetails ON Orders.order_id = OrderDetails.order_id
@@ -93,15 +106,30 @@ class UI(QtWidgets.QMainWindow):
         JOIN Address ON CustomerAddress.address_id = Address.address_id
         LEFT JOIN CustomerPaymentInfo ON Customer.customer_id = CustomerPaymentInfo.customer_id
         LEFT JOIN PaymentInfo ON CustomerPaymentInfo.payment_id = PaymentInfo.payment_id
-        where 1=1
+        WHERE 1=1
         """
         params = []
     
+        if self.paid_2.isChecked():
+            query += """
+            AND payment_status LIKE 'Paid' AND processing_status LIKE 'Processing'
+            """
+        elif self.notpaid_2.isChecked():
+            query += """
+            AND payment_status LIKE 'Awaiting Payment' AND processing_status LIKE 'Processing'
+            """
 
+        # Fulfillment status filter (only if fulfillment_2 is checked)
+        if self.fulfillment_2.isChecked():
+            query += " AND processing_status LIKE 'Processing'"
 
-        paymentmode = self.filterpmstatus_2.currentText()
+        # All Orders (when allorders_2 is checked, show everything)
+        if self.allorders_2.isChecked():
+            pass  # No additional filter for all orders, it shows everything
+
+        payment_mode = self.filterpmstatus_2.currentText()
         # Add the condition for payment_status if it's not "Any"
-        if paymentmode != "Any":
+        if payment_mode != "Any":
             query += """
             AND (CASE
                     WHEN PaymentInfo.payment_id IS NULL THEN 'Bank Transfer'
@@ -109,7 +137,11 @@ class UI(QtWidgets.QMainWindow):
                 END) = ?
             """
             # Append the selected payment status to params
-            params.append(paymentmode)
+            params.append(payment_mode)
+
+        if self.filterpstatus_2.currentText() != "Any":
+            query += " AND payment_status = ?"
+            params.append(self.filterpstatus_2.currentText())
         
         # Processing Status Filter
         if self.filterfstatus_2.currentText() != "Any":
@@ -137,12 +169,17 @@ class UI(QtWidgets.QMainWindow):
             """
             params.extend([search_filter] * 5)
 
+        # print("Executing query:", query)
+        # print("With parameters:", params)
+
+
+
         try:
             conn = pyodbc.connect(self.conn_string)
             cursor = conn.cursor()
             cursor.execute(query, params)
             filtered_orders = cursor.fetchall()
-
+        
             # Populate filtered orders
             self.populate_orders(filtered_orders)
 
@@ -160,6 +197,7 @@ class UI(QtWidgets.QMainWindow):
         for order in orders:
             # Order details
             order_id, order_date, payment_status, processing_status, firstname, lastname, email, phone, address, city = order
+
             # Query to fetch product details for this specific order_id
             product_query = """
             SELECT 
@@ -325,15 +363,179 @@ class UI(QtWidgets.QMainWindow):
         self.report_screen.show()
     
     def showproducts(self):
-        # Create an instance of the products screen and show it
+        """
+        Show the Products Screen and populate the existing listWidget.
+        """
         self.products_screen = ProductsScreen()
         self.products_screen.show()
 
-        self.products_screen.edit1.clicked.connect(self.showeditproducts)
+        # Clear the listWidget to avoid duplication
+        self.products_screen.listWidget.clear()
 
-    def showeditproducts(self):
+        # Fetch grouped product data
+        products = self.fetch_and_group_products()
+
+        # Populate the listWidget with product details
+        for prefix, product in products.items():
+            self.add_product_to_list(product)
+
+        self.products_screen.searchprod.textChanged.connect(self.filter_products)
+
+    def filter_products(self):
+        """
+        Run a query to filter products based on the search query.
+        """
+        # Get search input
+        search_query = self.products_screen.searchprod.text().strip()
+
+        # Prepare the SQL query with LIKE for name, category, ID, and description
+        query = """
+        SELECT prod_id, name, price, category, description, photo_path
+        FROM Product
+        WHERE name LIKE ?
+        OR category LIKE ?
+        OR prod_id LIKE ?
+        OR description LIKE ?
+        """
+        params = [f"%{search_query}%", f"%{search_query}%", f"%{search_query}%", f"%{search_query}%"]
+
+        # Execute the query
+        try:
+            conn = pyodbc.connect(self.conn_string)
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+            conn.close()
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Database Error", f"Failed to filter products: {str(e)}")
+            return
+
+        # Clear the existing listWidget
+        self.products_screen.listWidget.clear()
+
+        # Populate the listWidget with the query results
+        for row in rows:
+            product = {
+                "prod_id": row[0],
+                "name": row[1],
+                "price": row[2],
+                "category": row[3],
+                "description": row[4],
+                "photopath": row[5]
+            }
+            self.add_product_to_list(product)
+
+
+
+    def fetch_and_group_products(self):
+        """
+        Fetch product data and group by product ID prefix.
+        """
+        query = """
+        SELECT prod_id, name, price, category, description, photo_path
+        FROM Product
+        """
+        try:
+            conn = pyodbc.connect(self.conn_string)
+            cursor = conn.cursor()
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            conn.close()
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Database Error", f"Failed to fetch products: {str(e)}")
+            return {}
+
+        # Group products by prefix and calculate options
+        grouped_products = defaultdict(list)
+        for row in rows:
+            prod_id, name, price, category, description, photopath = row
+            prefix = prod_id.split('_')[0]  # Extract prefix (e.g., P1, P10)
+            color = prod_id.split('_')[1]   # Extract color part
+            grouped_products[prefix].append({
+                "prod_id": prod_id,
+                "name": name,
+                "price": price,
+                "category": category,
+                "description": description,
+                "photopath": photopath,
+                "color": color
+            })
+
+        # Choose one product per prefix and calculate options
+        processed_products = {}
+        for prefix, items in grouped_products.items():
+            first_item = items[0]  # Choose the first item as the main product
+            options_count = len(items)  # Count the number of variations
+            first_item['options'] = f"{options_count} Options"
+            processed_products[prefix] = first_item
+
+        return processed_products
+
+    def add_product_to_list(self, product):
+        """
+        Add a single product to the existing listWidget.
+        :param product: Dictionary containing product details.
+        """
+        # Unpack product details
+        prod_id = product.get("prod_id")
+        name = product.get("name")
+        price = product.get("price")
+        category = product.get("category")
+        description = product.get("description")
+        options = product.get("options")
+        photopath = product.get("photopath")
+
+        # Create a container widget for product details
+        product_widget = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout()
+
+        # Product Image
+        image_label = QtWidgets.QLabel()
+        image_label.setFixedSize(100, 100)
+        if photopath and os.path.exists(photopath):
+            image_label.setPixmap(QtGui.QPixmap(photopath).scaled(100, 100, QtCore.Qt.AspectRatioMode.KeepAspectRatio))
+        else:
+            image_label.setText("No Image")
+            image_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        # Product Details
+        details_layout = QtWidgets.QVBoxLayout()
+        name_label = QtWidgets.QLabel(f"<b>{name}</b>")
+        price_label = QtWidgets.QLabel(f"Price: {price} Rs")
+        category_label = QtWidgets.QLabel(f"Category: {category}")
+        options_label = QtWidgets.QLabel(f"Options: {options}")
+        description_label = QtWidgets.QLabel(f"{description}")
+
+        details_layout.addWidget(name_label)
+        details_layout.addWidget(price_label)
+        details_layout.addWidget(category_label)
+        details_layout.addWidget(options_label)
+        details_layout.addWidget(description_label)
+
+        # Edit Button
+        edit_button = QtWidgets.QPushButton("Edit Product")
+        edit_button.clicked.connect(lambda: self.showeditproducts(prod_id))
+
+        # Add everything to the layout
+        layout.addWidget(image_label)
+        layout.addLayout(details_layout)
+        layout.addWidget(edit_button)
+
+        product_widget.setLayout(layout)
+
+        # Add the widget to the existing listWidget
+        list_item = QtWidgets.QListWidgetItem(self.products_screen.listWidget)
+        list_item.setSizeHint(product_widget.sizeHint())  # Set the item's size
+        self.products_screen.listWidget.addItem(list_item)
+        self.products_screen.listWidget.setItemWidget(list_item, product_widget)
+
+
+    def showeditproducts(self, prod_id):
         # Create an instance of the edit products screen and show it
-        self.editproducts_screen = EditProductsScreen()
+        if prod_id:
+            print(f"Editing product with ID: {prod_id}")  # Debugging statement
+        self.editproducts_screen = EditProductsScreen(prod_id)
+        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
         self.editproducts_screen.show()
     
     def showEditRawMats(self):
@@ -341,11 +543,159 @@ class UI(QtWidgets.QMainWindow):
         self.editRawMats_screen.show()
 
 class EditProductsScreen(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, prod_id):
         # Call the inherited classes __init__ method
         super(EditProductsScreen, self).__init__()
         # Load the .ui file
         uic.loadUi('projectScreen2.ui', self)
+        self.conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
+        self.product_id = prod_id
+        self.base_price = 0
+        self.variants = []
+
+        # Load product details
+        self.load_product_details()
+
+        # Connect buttons
+        self.addvariant.clicked.connect(self.add_variant)
+        self.save.clicked.connect(self.save_changes)
+        self.cancel.clicked.connect(self.close)
+        self.addphotopushButton.clicked.connect(self.add_photo)
+
+    def load_product_details(self):
+        """
+        Load product details and variants from the database.
+        """
+        try:
+            uic.loadUi('projectScreen2.ui', self)
+            conn = pyodbc.connect(self.conn_string)
+            cursor = conn.cursor()
+
+            # Fetch product details
+            query = """
+            SELECT name, prod_id, price, category, description, photo_path 
+            FROM Product WHERE prod_id LIKE ?
+            """
+            cursor.execute(query, [self.product_id + '%'])
+            rows = cursor.fetchall()
+            
+
+            # Set base product details (minimum price)
+            main_product = min(rows, key=lambda x: x[2])  # Find the product with the minimum price
+            print(main_product)
+            self.base_price = main_product[2]
+            self.newname.setText(main_product[0])
+            self.prod_id.setText(main_product[1].split('_')[0])
+            self.baseprice.setText(str(self.base_price))
+            self.prodtypecomboBox.setCurrentText(main_product[3])
+            self.description.setPlainText(main_product[4])
+            self.currentname.setText(f"{main_product[0]}")  # Display current name
+
+            # Load variants
+            self.variants = rows
+            self.display_variants()
+
+            conn.close()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Error", f"Failed to load product: {str(e)}")
+
+    def display_variants(self):
+        """
+        Display all variants in the QListWidget.
+        """
+        self.variantsdisplay.clear()
+        for variant in self.variants:
+            prod_code = variant[1]
+            color = prod_code.split('_')[1] if '_' in prod_code else 'N/A'
+            price_diff = int(variant[2]) - self.base_price
+            item_text = f"Color: {color}, Extra Cost: +{price_diff}"
+            list_item = QtWidgets.QListWidgetItem(item_text)
+
+            # Add a Remove button
+            remove_button = QtWidgets.QPushButton("Remove")
+            remove_button.clicked.connect(lambda _, code=prod_code: self.remove_variant(code))
+
+            # Set widget in QListWidget
+            widget = QtWidgets.QWidget()
+            layout = QtWidgets.QHBoxLayout()
+            layout.addWidget(QtWidgets.QLabel(item_text))
+            layout.addWidget(remove_button)
+            widget.setLayout(layout)
+
+            self.variantsdisplay.addItem(list_item)
+            self.variantsdisplay.setItemWidget(list_item, widget)
+
+    def add_variant(self):
+        """
+        Add a new variant to the QListWidget and variants list.
+        """
+        color = self.variantname.text().strip()
+        cost_modifier = self.variantcost.text().strip()
+
+        if not color or not cost_modifier.isdigit():
+            QtWidgets.QMessageBox.warning(self, "Input Error", "Enter valid color and cost modifier.")
+            return
+
+        # Add variant entry
+        new_prod_code = f"{self.prod_id.text()}_{color}"
+        new_price = self.base_price + int(cost_modifier)
+        self.variants.append((self.newname.text(), new_prod_code, new_price, "", ""))
+
+        self.display_variants()
+        self.variantname.clear()
+        self.variantcost.clear()
+
+    def remove_variant(self, prod_code):
+        """
+        Remove a variant from the variants list.
+        """
+        self.variants = [v for v in self.variants if v[1] != prod_code]
+        self.display_variants()
+
+    def add_photo(self):
+        """
+        Select and update photo path.
+        """
+        photo_path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select Photo", "", "Images (*.png *.jpg *.jpeg)")
+        if photo_path:
+            print(f"Selected photo: {photo_path}")
+            self.photopath = photo_path
+            self.currentname.setText("Photo updated successfully!")
+
+    def save_changes(self):
+        """
+        Save changes to the database.
+        """
+        try:
+            conn = pyodbc.connect(self.conn_string)
+            cursor = conn.cursor()
+
+            # Update main product details
+            cursor.execute("""
+                UPDATE Product SET name=?, price=?, category=?, description=?, photo_path=?
+                WHERE prod_id LIKE ?
+            """, [
+                self.newname.text(), self.baseprice.text(),
+                self.prodtypecomboBox.currentText(), self.description.toPlainText(), 
+                self.photopath, self.prod_id.text() + '%'
+            ])
+
+            # Delete existing variants and add new ones
+            cursor.execute("DELETE FROM Products WHERE prod_id LIKE ?", [self.prod_id.text() + '%'])
+            for variant in self.variants:
+                cursor.execute("""
+                    INSERT INTO Product (name, prod_id, price, category, description, photo_path)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, variant)
+
+            conn.commit()
+            conn.close()
+            QtWidgets.QMessageBox.information(self, "Success", "Product saved successfully!")
+            self.close()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Error", f"Failed to save changes: {str(e)}")
 
 class EditRawMatsScreen(QtWidgets.QMainWindow):
     def __init__(self):
@@ -363,7 +713,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
         # Close button functionality
         self.closebutton.clicked.connect(self.close)
     def populate_table(self):
-        conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -445,7 +795,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
             return
 
         # Connect to the database and insert the new raw material
-        conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -478,7 +828,7 @@ class EditRawMatsScreen(QtWidgets.QMainWindow):
         column_name = self.RawMatsTable.horizontalHeaderItem(col).text()
 
         # Connect to the database
-        conn_string = "Driver={SQL Server};Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SF\MYSQLSERVER1;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()

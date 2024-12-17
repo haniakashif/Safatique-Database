@@ -1,8 +1,8 @@
 import sys
 from PyQt6 import QtWidgets, uic
-from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget, QGridLayout, QScrollArea, QDialog, QTableWidget
+from PyQt6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget, QGridLayout, QScrollArea, QDialog, QTableWidget, QMessageBox
 from PyQt6.QtGui import QPixmap, QPainter
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QDate
 import pyodbc
 import datetime
 
@@ -36,7 +36,13 @@ class LoginScreen(QtWidgets.QMainWindow):
         self.pushButton_signup.clicked.connect(self.show_signup_screen)
         self.pushButton_login.clicked.connect(self.validate_login) #change this to validate_login
         self.lineEdit_password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
+        self.pushButton_Quick.clicked.connect(self.quickLogin)
         # self.pushButton_close.clicked.connect(self.close)
+        
+    def quickLogin(self):
+        self.lineEdit_username.setText("Ahad001234")
+        self.lineEdit_password.setText("Pass1234")
+        self.validate_login()
         
     def show_signup_screen(self):
         self.signup_screen = SignupScreen(self)
@@ -59,7 +65,7 @@ class LoginScreen(QtWidgets.QMainWindow):
         # Get the username and password entered by the user
         username = self.lineEdit_username.text()
         password = self.lineEdit_password.text()
-        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -172,7 +178,7 @@ class SignupScreen(QtWidgets.QMainWindow):
         elif password != repassword:
             self.show_popup("Passwords do not match.")
         else:
-            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
             conn = None
             cursor = None
             try:
@@ -288,7 +294,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.close()
     
     def query_products(self, filters=None):
-        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         products = []
         try:
             # Establish connection
@@ -423,7 +429,7 @@ class CatalogueScreen(QtWidgets.QMainWindow):
         self.populate_products(filters)
 
     def load_categories(self):
-        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -496,7 +502,7 @@ class ProductsScreen(QtWidgets.QMainWindow):
         current_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
         # Database connection
-        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
         try:
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
@@ -594,7 +600,7 @@ class CartScreen(QtWidgets.QMainWindow):
 
     def get_cart_items(self):
         cart_items = []
-        conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
 
         try:
             conn = pyodbc.connect(conn_string)
@@ -664,7 +670,7 @@ class CartScreen(QtWidgets.QMainWindow):
             return
 
         try:
-            conn_string = "Driver={SQL Server};Server=ANYA\\SQLSERVER;Database=safatique;Trusted_Connection=True;"
+            conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
             conn = pyodbc.connect(conn_string)
             cursor = conn.cursor()
 
@@ -740,6 +746,7 @@ class CartScreen(QtWidgets.QMainWindow):
         self.update_cart()
         
 class CheckoutScreen(QtWidgets.QMainWindow):
+    total = 0
     def __init__(self, parent=None):
         super(CheckoutScreen, self).__init__(parent)
         self.parent = parent
@@ -747,14 +754,213 @@ class CheckoutScreen(QtWidgets.QMainWindow):
         self.setWindowTitle("Checkout")
         self.setFixedSize(self.size())
         self.pushButton_placeOrder.clicked.connect(self.show_place_order_screen)
+        self.comboBox_cities.setPlaceholderText("Select your city")
+        self.update_details()
+        conn = pyodbc.connect(conn_string)
+        cursor = conn.cursor()
+        query = "SELECT firstname, lastname, email, phone FROM [Customer] WHERE customer_id = ?"
+        cursor.execute(query, (customerID))
+        result = cursor.fetchall()
+        self.label_CustomerFirstName.setText(result[0][0])
+        self.label_CustomerLastName.setText(result[0][1])
+        self.label_CustomerEmail.setText(result[0][2])
+        self.label_CustomerContact.setText(result[0][3])
+        query = """
+            select [address] from Customer c join CustomerAddress ca on c.customer_id = ca.customer_id
+            join [Address] a on ca.address_id = a.address_id
+            where c.customer_id = ?
+            """
+        cursor.execute(query, (customerID))
+        result = cursor.fetchall()
+        self.label_CustomerAddress.setText(result[0][0])
+        query = "select distinct city from DeliveryCharges"
+        cursor.execute(query)
+        result = cursor.fetchall()
+        self.comboBox_cities.clear()
+        self.comboBox_cities.addItems([row[0] for row in result])
+        cursor.close() 
+        conn.close()
         
+        self.checkBox_COD.stateChanged.connect(self.COD)
+        self.checkBox_savedAddress.stateChanged.connect(self.UseSavedAddress)
+        self.checkBox_savedCard.stateChanged.connect(self.UseSavedCard)
+        self.comboBox_cities.currentIndexChanged.connect(self.updateDC)
+        # print(self.comboBox_cities.currentIndex())
+        
+    def updateDC(self):
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+            query = """
+                select cost from DeliveryCharges
+                where city = ?
+                """
+            cursor.execute(query,(str(self.comboBox_cities.currentText())))
+            result = cursor.fetchall()
+            self.lineEdit_DC.setText(str(result[0][0]))
+            self.lineEdit_Total.setText(str(self.total + result[0][0]))
+            cursor.close() 
+            conn.close()
+        
+    def COD(self):
+        if self.checkBox_COD.isChecked():
+            self.lineEdit_newCard.setReadOnly(True)
+            self.lineEdit_newCVC.setReadOnly(True)
+            self.dateEdit_expiry.setReadOnly(True)
+        else:
+            self.lineEdit_newCard.setReadOnly(False)
+            self.lineEdit_newCVC.setReadOnly(False)
+            self.dateEdit_expiry.setReadOnly(False)
+            
+    def UseSavedCard(self):
+        if self.checkBox_savedCard.isChecked:
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+            query = """
+                select cardnumber, card_cvc, card_expiry from Customer c join CustomerPaymentInfo cpi on c.customer_id = cpi.customer_id
+                join PaymentInfo [pi] on [pi].payment_id = cpi.payment_id
+                where c.customer_id = ?;
+                """
+            cursor.execute(query,(customerID))
+            result = cursor.fetchall()
+            try:
+                self.lineEdit_newCard.setText(str(result[0][0]))
+                self.lineEdit_newCVC.setText(str(result[0][1]))
+                qdate = QDate.fromString(result[0][2], "yyyy-MM-dd")
+                self.dateEdit_expiry.setDate(qdate)
+                self.lineEdit_newCard.setReadOnly(True)
+                self.lineEdit_newCVC.setReadOnly(True)
+                self.dateEdit_expiry.setReadOnly(True)
+                cursor.close() 
+                conn.close()
+            except IndexError:
+                cursor.close() 
+                conn.close()
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Critical)  # Set icon to critical (error)
+                msg.setWindowTitle("Error")            # Set the window title
+                msg.setText("No card saved")           # Set the main message
+                msg.setStandardButtons(QMessageBox.StandardButton.Ok)  # Add OK button
+                msg.exec()
+                self.checkBox_savedCard.setChecked(False)
+        else:
+            self.lineEdit_newCard.setReadOnly(False)
+            self.lineEdit_newCVC.setReadOnly(False)
+            self.dateEdit_expiry.setReadOnly(False)
+            self.lineEdit_newCard.clear()
+            self.lineEdit_newCVC.clear()
+            self.dateEdit_expiry.clear()
+    def UseSavedAddress(self):
+        if self.checkBox_savedAddress.isChecked():
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+            query = """
+                select [address], city from Customer c join CustomerAddress ca on c.customer_id = ca.customer_id
+                join [Address] a on ca.address_id = a.address_id
+                where c.customer_id = ?
+                """
+            cursor.execute(query, (customerID))
+            result = cursor.fetchall()
+            try:
+                self.lineEdit_newAddress.setText(result[0][0])
+                self.lineEdit_newAddress.setReadOnly(True)
+                self.comboBox_cities.setEnabled(False)
+                query = """
+                    select cost from DeliveryCharges dc join [Address]a on dc.city = a.city
+                    join CustomerAddress ca on a.address_id = ca.address_id
+                    join Customer c on c.customer_id = ca.customer_id
+                    where c.customer_id = ?
+                    """
+                cursor.execute(query,(customerID))
+                result = cursor.fetchall()
+                self.lineEdit_DC.setText(str(result[0][0]))
+                self.lineEdit_Total.setText(str(self.total + result[0][0]))
+                cursor.close() 
+                conn.close()
+            except IndexError:
+                cursor.close()
+                conn.close()
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Critical)  # Set icon to critical (error)
+                msg.setWindowTitle("Error")            # Set the window title
+                msg.setText("No address saved")           # Set the main message
+                msg.setStandardButtons(QMessageBox.StandardButton.Ok)  # Add OK button
+                msg.exec()
+                self.checkBox_savedAddress.setChecked(False)
+        else:
+            self.comboBox_cities.setEnabled(True)
+            self.lineEdit_newCard.setReadOnly(False)
+            self.lineEdit_newCard.clear()
+            self.lineEdit_newCVC.setReadOnly(False)
+            self.lineEdit_newCVC.clear()
+            self.dateEdit_expiry.setReadOnly(False)
+            self.dateEdit_expiry.clear()
+            
+    def get_cart_items(self):
+        """
+        Fetch cart items from the database for the current customer.
+        Returns a list of dictionaries containing cart item details.
+        """
+        cart_items = []
+        conn_string = "Driver={SQL Server};Server=SHAAFPC\DBSQLSERVER;Database=safatique;Trusted_Connection=True;"
+
+        try:
+            conn = pyodbc.connect(conn_string)
+            cursor = conn.cursor()
+            # SQL Query to fetch cart items and product details
+            query = """
+                SELECT P.name, P.prod_id, CI.quantity, CI.unit_price
+                FROM CartItems CI
+                INNER JOIN Product P ON CI.prod_id = P.prod_id
+                WHERE CI.customer_id = ?
+            """
+            cursor.execute(query, (customerID,))
+            rows = cursor.fetchall()
+
+            # Convert rows to list of dictionaries
+            for row in rows:
+                cart_items.append({
+                    "name": row[0],
+                    "prod_id": row[1],
+                    "quantity": row[2],
+                    "unit_price": row[3],
+                    "Total Price": row[2] * row[3]
+                })
+        except pyodbc.Error as e:
+            print(f"Database Error: {e}")
+            self.show_popup(f"Error fetching cart: {str(e)}")
+        finally:
+            if 'cursor' in locals():
+                cursor.close()
+            if 'conn' in locals():
+                conn.close()
+        return cart_items
+    
+    def update_details(self):
+        # Clear existing rows
+        self.ProductsTableWidget.setRowCount(0)
+        # Fetch cart items from database
+        cart_items = self.get_cart_items()
+        # Populate the table with cart items
+        for item in cart_items:
+            row_position = self.ProductsTableWidget.rowCount()
+            self.ProductsTableWidget.insertRow(row_position)
+
+            self.ProductsTableWidget.setItem(row_position, 0, QtWidgets.QTableWidgetItem(item["name"]))
+            self.ProductsTableWidget.setItem(row_position, 1, QtWidgets.QTableWidgetItem(str(item["unit_price"])))
+            self.ProductsTableWidget.setItem(row_position, 2, QtWidgets.QTableWidgetItem(str(item["quantity"])))
+            self.ProductsTableWidget.setItem(row_position, 3, QtWidgets.QTableWidgetItem(str(item["unit_price"] * item["quantity"])))
+            self.total += item["unit_price"] * item["quantity"]
+            
+        self.lineEdit_DC.setText("Select City")
+        self.lineEdit_Total.setText(str(self.total))
+
+
     def show_place_order_screen(self):
         # Simulate order placement logic
         order_successful = True  # Replace with actual logic
 
         if order_successful:
             self.show_popup("Order placed successfully!")
-            print("closing checkout screen")
             self.close()
         else:
             self.show_popup("Error placing order. Please try again.")
