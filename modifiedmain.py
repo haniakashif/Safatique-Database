@@ -86,7 +86,7 @@ class LoginScreen(QtWidgets.QMainWindow):
                 cursor.execute(query, (customerID))
                 result = cursor.fetchall()
                 global addressID
-                addressID = result[0][0]
+                #addressID = result[0][0]
                 # print("customerID: ", customerID)
                 # print("addressID: ", addressID)
                 # print("usernameCustomer: ", usernameCustomer)
